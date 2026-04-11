@@ -1,4 +1,4 @@
-const categoryOrder = ['PLANET', 'NEBULA', 'GALAXY', 'COMETS'];
+const categoryOrder = ['PLANETS', 'NEBULAE', 'GALAXIES', 'COMETS'];
 const subcategoryOrder = {
     PLANET: ['JUPITER', 'MARS', 'MOON', 'OVERVIEW']
 };
@@ -8,67 +8,65 @@ const photosByCategory = {
         JUPITER: [
             {
                 title: 'Jupiter - 2022.11.06',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2022-11-06.jpg',
                 sort: 1
             },
             {
                 title: 'Jupiter - 2023.10.24',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2023-10-24.jpg',
                 sort: 2
             },
             {
-                title: 'Jupiter - 2025.12.17',
-                meta: 'Jupiter | C925 | QHY716MC',
-                url: 'library/jup-2025-12-17.jpg',
+                title: 'Jupiter - 2025.11.04',
+                meta: 'Jupiter | C925 | QHY715MC',
+                url: 'library/jup-2025-11-04.jpg',
                 sort: 5
             },
             {
                 title: 'Jupiter - 2025.11.21',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2025-11-21.jpg',
                 sort: 6
             },
             {
-                title: 'Jupiter - 2025.11.04',
-                meta: 'Jupiter | C925 | QHY716MC',
-                url: 'library/jup-2025-11-04.jpg',
+                title: 'Jupiter - 2025.12.17',
+                meta: 'Jupiter | C925 | QHY715MC',
+                url: 'library/jup-2025-12-17.jpg',
                 sort: 7
             },
             {
                 title: 'Jupiter - 2026.01.14',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2026-01-14.jpg',
                 sort: 8
             },
             {
                 title: 'Jupiter - 2026.03.13',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2026-03-13.jpg',
                 sort: 9
             },
             {
                 title: 'Jupiter - 2026.04.04',
-                meta: 'Jupiter | C925 | QHY716MC',
+                meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2026-04-04.jpg',
-                sort: 11
+                sort: 10
             }
         ],
         MOON: [
             {
                 title: 'Lunar Surface Detail',
-                meta: 'Moon | C925 | QHY716MC',
+                meta: 'Moon | Skywatcher 150f4 | Toupek 2600mc',
                 url: 'library/luna.jpg',
                 sort: 1
             }
         ],
-        MERCURY: [],
-        VENUS: [],
         MARS: [
             {
                 title: 'Mars - 2025.01.12',
-                meta: 'Mars | C925 | QHY716MC',
+                meta: 'Mars | C925 | QHY715MC',
                 url: 'library/mars-2025-01-12.jpg',
                 sort: 1
             }
