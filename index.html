@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Gallery | Astrophotography Portfolio</title>
+    <!-- Elegant Serif Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050506; /* Even deeper black for contrast */
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --accent: #c5a059; /* Muted gold */
+            --spacing: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Starry Background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Elegant Header Section */
+        header {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: var(--spacing);
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            letter-spacing: 0.2rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1.2s forwards;
+            text-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4rem;
+            color: var(--accent);
+            opacity: 0;
+            animation: fadeInUp 1.2s 0.3s forwards;
+        }
+
+        /* Photo Grid Layout */
+        .gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing) 100px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 40px;
+            position: relative;
+        }
+
+        .photo-card {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .photo-card:hover {
+            transform: scale(1.02);
+            border: 1px solid rgba(197, 160, 89, 0.3);
+        }
+
+        .photo-card img {
+            width: 100%;
+            max-width: 1200px; /* Constrain to your requested width */
+            height: 600px;
+            object-fit: contain; /* Better for planet shots to show the whole disk */
+            display: block;
+            margin: 0 auto;
+            filter: grayscale(5%) brightness(90%);
+            transition: filter 0.6s ease;
+            background: #000;
+        }
+
+        .photo-card:hover img {
+            filter: grayscale(0%) brightness(100%);
+        }
+
+        .photo-info {
+            padding: 20px;
+            text-align: left;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
+        }
+
+        .photo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 5px;
+        }
+
+        .photo-meta {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+        }
+
+        /* Lightbox Effect (Click to expand) */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            letter-spacing: 0.1rem;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .gallery { grid-template-columns: 1fr; }
+            .photo-card img { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Stars Layer -->
+    <div class="stars-container" id="stars-container"></div>
+
+    <header>
+        <div class="subtitle">Aiken Astrophotography</div>
+        <h1>CELESTIAL GALLERY</h1>
+        <div style="width: 40px; height: 1px; background: var(--accent); margin-top: 20px;"></div>
+    </header>
+
+    <main class="gallery" id="gallery">
+        <!-- Photos will be rendered by JavaScript -->
+    </main>
+
+    <div id="lightbox" onclick="this.style.display='none'">
+        <img src="" id="lightbox-img">
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Astrophotography Collection &middot; Keep Looking Up</p>
+    </footer>
+
+    <script>
+        // Star Background Generator
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const starCount = 150;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 2 + 1 + 'px';
+                const x = Math.random() * 100 + '%';
+                const y = Math.random() * 100 + '%';
+                const duration = Math.random() * 3 + 2 + 's';
+                const delay = Math.random() * 5 + 's';
+                
+                star.style.width = size;
+                star.style.height = size;
+                star.style.left = x;
+                star.style.top = y;
+                star.style.setProperty('--duration', duration);
+                star.style.animationDelay = delay;
+                
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        /* 
+           PHOTO CONFIGURATION
+           Pointing to your local "2026/" folder.
+        */
+        const photos = [
+            {
+                title: "Lunar Surface Detail",
+                meta: "High Res Moon | luna.png",
+                url: "2026/luna.png"
+            },
+            {
+                title: "Jupiter - 2026.04.04",
+                meta: "Planetary Imaging | jup-2026-04-04.png",
+                url: "2026/jup-2026-04-04.png"
+            },
+            {
+                title: "Mars - 2025.01.12",
+                meta: "The Red Planet | mars-2025-01-12.png",
+                url: "2026/mars-2025-01-12.png"
+            },
+            {
+                title: "Jupiter Transition",
+                meta: "Aspect Comparison | changing aspect of Jup.png",
+                url: "2026/changing aspect of Jup.png"
+            },
+            {
+                title: "Jupiter - 2026.01.14",
+                meta: "Opposition Phase | jup-2026-01-14.png",
+                url: "2026/jup-2026-01-14.png"
+            },
+            {
+                title: "Jupiter - 2025.12.17",
+                meta: "Winter Observation | jup-2025-12-17.png",
+                url: "2026/jup-2025-12-17.png"
+            }
+        ];
+
+        const gallery = document.getElementById('gallery');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        // Dynamically generate the gallery
+        photos.forEach(photo => {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            card.innerHTML = `
+                <img src="${photo.url}" alt="${photo.title}" loading="lazy">
+                <div class="photo-info">
+                    <div class="photo-title">${photo.title}</div>
+                    <div class="photo-meta">${photo.meta}</div>
+                </div>
+            `;
+            
+            card.onclick = () => {
+                lightboxImg.src = photo.url;
+                lightbox.style.display = 'flex';
+            };
+            
+            gallery.appendChild(card);
+        });
+    </script>
+</body>
+</html>
