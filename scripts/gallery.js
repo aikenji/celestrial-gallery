@@ -139,7 +139,7 @@
         });
     }
 
-    function getHomePhotos(limit = 3) {
+    function getHomePhotos(limit = 4) {
         const buckets = categoryOrder
             .map(category => shufflePhotos(getCategoryPhotos(category)))
             .filter(bucket => bucket.length > 0);
@@ -161,7 +161,7 @@
         gallery.innerHTML = '';
 
         const items = category === 'ALL'
-            ? getHomePhotos(3)
+            ? getHomePhotos(4)
             : getCategoryPhotos(category, subcategory)
                 .slice()
                 .sort((a, b) => (a.sort || 0) - (b.sort || 0));
