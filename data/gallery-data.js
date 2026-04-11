@@ -1,6 +1,6 @@
 const categoryOrder = ['PLANET', 'NEBULA', 'GALAXY', 'COMETS'];
 const subcategoryOrder = {
-    PLANET: ['JUPITER', 'MARS', 'MOON', 'OVERVIEW', 'MERCURY', 'VENUS', 'SATURN']
+    PLANET: ['JUPITER', 'MARS', 'MOON', 'OVERVIEW']
 };
 
 const photosByCategory = {
@@ -91,13 +91,32 @@ const photosByCategory = {
             sort: 1
         }
     ],
-    GALAXY: [],
+    GALAXY: [
+        {
+            title: 'M31 Andromeda Galaxy',
+            meta: 'M31 | Deep Sky',
+            url: '2026/M31-2023-07-25.jpg',
+            sort: 1
+        },
+        {
+            title: 'Markarian Chain',
+            meta: 'Galaxy Cluster | Deep Sky',
+            url: '2026/MarkarianChain.jpg',
+            sort: 2
+        }
+    ],
     COMETS: [
         {
             title: 'C/2024 E3 Tsuchinshan',
             meta: 'Comet | Deep Sky',
             url: '2026/C2024-E3-Tsuchinshan-2024-10-23-ed2.jpg',
             sort: 1
+        },
+        {
+            title: 'C/2022 E3 ZTF',
+            meta: 'Comet | Deep Sky',
+            url: '2026/C2022E3_ZTF-2023-01-18_v2.jpg',
+            sort: 2
         }
     ]
 };

@@ -48,7 +48,7 @@ body {
 }
 
 header {
-    height: 50vh;
+    min-height: 35vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
