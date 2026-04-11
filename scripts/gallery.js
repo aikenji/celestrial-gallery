@@ -94,9 +94,9 @@
 
         const items = [
             ['Home', 'ALL'],
-            ['Planet', 'PLANET'],
-            ['Nebula', 'NEBULA'],
-            ['Galaxy', 'GALAXY'],
+            ['Planets', 'PLANETS'],
+            ['Nebulae', 'NEBULAE'],
+            ['Galaxies', 'GALAXIES'],
             ['Comets', 'COMETS']
         ];
 

@@ -1,10 +1,10 @@
 const categoryOrder = ['PLANETS', 'NEBULAE', 'GALAXIES', 'COMETS'];
 const subcategoryOrder = {
-    PLANET: ['JUPITER', 'MARS', 'MOON', 'OVERVIEW']
+    PLANETS: ['JUPITER', 'MERCURY', 'MARS', 'SATURN', 'URANUS', 'NEPTUNE', 'MOON', 'OVERVIEW']
 };
 
 const photosByCategory = {
-    PLANET: {
+    PLANETS: {
         JUPITER: [
             {
                 title: 'Jupiter - 2022.11.06',
@@ -43,16 +43,10 @@ const photosByCategory = {
                 sort: 8
             },
             {
-                title: 'Jupiter - 2026.03.13',
-                meta: 'Jupiter | C925 | QHY715MC',
-                url: 'library/jup-2026-03-13.jpg',
-                sort: 9
-            },
-            {
                 title: 'Jupiter - 2026.04.04',
                 meta: 'Jupiter | C925 | QHY715MC',
                 url: 'library/jup-2026-04-04.jpg',
-                sort: 10
+                sort: 9
             }
         ],
         MOON: [
@@ -71,6 +65,14 @@ const photosByCategory = {
                 sort: 1
             }
         ],
+        MERCURY: [
+            {
+                title: 'Mercury - 2025.08.23',
+                meta: 'Mercury | C925 | QHY715MC',
+                url: 'library/mer-2025-08-23.jpg',
+                sort: 1
+            }
+        ],
         OVERVIEW: [
             {
                 title: 'Solar System Overview',
@@ -79,9 +81,44 @@ const photosByCategory = {
                 sort: 1
             }
         ],
-        SATURN: []
+        SATURN: [
+            {
+                title: 'Saturn - 2025.08.19 Remake',
+                meta: 'Saturn | C925 | QHY715MC',
+                url: 'library/sat-2025-08-19-remake.jpg',
+                sort: 1
+            },
+            {
+                title: 'Saturn - 2025.11.04',
+                meta: 'Saturn | C925 | QHY715MC',
+                url: 'library/sat-2025-11-04.jpg',
+                sort: 2
+            }
+        ],
+        URANUS: [
+            {
+                title: 'Uranus - 2025.09.17',
+                meta: 'Uranus | C925 | QHY715MC',
+                url: 'library/ura-2025-09-17.jpg',
+                sort: 1
+            },
+            {
+                title: 'Uranus - 2025.10.10',
+                meta: 'Uranus | C925 | QHY715MC',
+                url: 'library/ura-2025-10-10.jpg',
+                sort: 2
+            }
+        ],
+        NEPTUNE: [
+            {
+                title: 'Neptune - 2025.08.22 ed2',
+                meta: 'Neptune | C925 | QHY715MC',
+                url: 'library/nep-2025-08-22 ed2.jpg',
+                sort: 1
+            }
+        ]
     },
-    NEBULA: [
+    NEBULAE: [
         {
             title: 'M78 Reflection Nebula',
             meta: 'M78 | Deep Sky',
@@ -89,7 +126,7 @@ const photosByCategory = {
             sort: 1
         }
     ],
-    GALAXY: [
+    GALAXIES: [
         {
             title: 'M31 Andromeda Galaxy',
             meta: 'M31 | Deep Sky',
