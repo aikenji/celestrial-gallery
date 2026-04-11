@@ -9,49 +9,49 @@ const photosByCategory = {
             {
                 title: 'Jupiter - 2022.11.06',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2022-11-06.jpg',
+                url: 'library/jup-2022-11-06.jpg',
                 sort: 1
             },
             {
                 title: 'Jupiter - 2023.10.24',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2023-10-24.jpg',
+                url: 'library/jup-2023-10-24.jpg',
                 sort: 2
             },
             {
                 title: 'Jupiter - 2025.12.17',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2025-12-17.jpg',
+                url: 'library/jup-2025-12-17.jpg',
                 sort: 5
             },
             {
                 title: 'Jupiter - 2025.11.21',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2025-11-21.jpg',
+                url: 'library/jup-2025-11-21.jpg',
                 sort: 6
             },
             {
                 title: 'Jupiter - 2025.11.04',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2025-11-04.jpg',
+                url: 'library/jup-2025-11-04.jpg',
                 sort: 7
             },
             {
                 title: 'Jupiter - 2026.01.14',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2026-01-14.jpg',
+                url: 'library/jup-2026-01-14.jpg',
                 sort: 8
             },
             {
                 title: 'Jupiter - 2026.03.13',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2026-03-13.jpg',
+                url: 'library/jup-2026-03-13.jpg',
                 sort: 9
             },
             {
                 title: 'Jupiter - 2026.04.04',
                 meta: 'Jupiter | C925 | QHY716MC',
-                url: '2026/jup-2026-04-04.jpg',
+                url: 'library/jup-2026-04-04.jpg',
                 sort: 11
             }
         ],
@@ -59,7 +59,7 @@ const photosByCategory = {
             {
                 title: 'Lunar Surface Detail',
                 meta: 'Moon | C925 | QHY716MC',
-                url: '2026/luna.jpg',
+                url: 'library/luna.jpg',
                 sort: 1
             }
         ],
@@ -69,7 +69,7 @@ const photosByCategory = {
             {
                 title: 'Mars - 2025.01.12',
                 meta: 'Mars | C925 | QHY716MC',
-                url: '2026/mars-2025-01-12.jpg',
+                url: 'library/mars-2025-01-12.jpg',
                 sort: 1
             }
         ],
@@ -77,7 +77,7 @@ const photosByCategory = {
             {
                 title: 'Solar System Overview',
                 meta: 'Composited view | 16:9',
-                url: '2026/solar system in 2025 16_9.jpg',
+                url: 'library/solar system in 2025 16_9.jpg',
                 sort: 1
             }
         ],
@@ -87,7 +87,7 @@ const photosByCategory = {
         {
             title: 'M78 Reflection Nebula',
             meta: 'M78 | Deep Sky',
-            url: '2026/M78.jpg',
+            url: 'library/M78.jpg',
             sort: 1
         }
     ],
@@ -95,13 +95,13 @@ const photosByCategory = {
         {
             title: 'M31 Andromeda Galaxy',
             meta: 'M31 | Deep Sky',
-            url: '2026/M31-2023-07-25.jpg',
+            url: 'library/M31-2023-07-25.jpg',
             sort: 1
         },
         {
             title: 'Markarian Chain',
             meta: 'Galaxy Cluster | Deep Sky',
-            url: '2026/MarkarianChain.jpg',
+            url: 'library/MarkarianChain.jpg',
             sort: 2
         }
     ],
@@ -109,13 +109,13 @@ const photosByCategory = {
         {
             title: 'C/2024 E3 Tsuchinshan',
             meta: 'Comet | Deep Sky',
-            url: '2026/C2024-E3-Tsuchinshan-2024-10-23-ed2.jpg',
+            url: 'library/C2024-E3-Tsuchinshan-2024-10-23-ed2.jpg',
             sort: 1
         },
         {
             title: 'C/2022 E3 ZTF',
             meta: 'Comet | Deep Sky',
-            url: '2026/C2022E3_ZTF-2023-01-18_v2.jpg',
+            url: 'library/C2022E3_ZTF-2023-01-18_v2.jpg',
             sort: 2
         }
     ]
