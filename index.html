@@ -242,7 +242,7 @@
 
     <header>
         <div class="subtitle">Aiken Astrophotography</div>
-        <h1>CELETIAL GALLERY </h1>
+        <h1>CELESTIAL GALLERY</h1>
         <nav>
             <button class="nav-item active" onclick="filterPhotos('ALL')">Home</button>
             <button class="nav-item" onclick="filterPhotos('PLANET')">Planet</button>
@@ -288,43 +288,100 @@
         }
         createStars();
 
-        // Photo Configuration with categories
+        const categoryOrder = ['PLANET', 'NEBULA', 'GALAXY', 'COMETS'];
+
+        // Photo configuration grouped by category
         const photos = [
             {
                 title: "Lunar Surface Detail",
-                meta: "High Res Moon | luna.png",
+                meta: "Moon | C925 | QHY716MC",
                 url: "2026/luna.png",
-                category: "PLANET"
+                category: "PLANET",
+                sort: 10
             },
             {
-                title: "Jupiter - 2026.04.04",
-                meta: "Planetary Imaging | jup-2026-04-04.png",
-                url: "2026/jup-2026-04-04.png",
-                category: "PLANET"
+                title: "Jupiter - 2022.11.06",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2022-11-06.png",
+                category: "PLANET",
+                sort: 1
+            },
+            {
+                title: "Jupiter - 2023.10.24",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2023-10-24.png",
+                category: "PLANET",
+                sort: 2
             },
             {
                 title: "Mars - 2025.01.12",
-                meta: "The Red Planet | mars-2025-01-12.png",
+                meta: "Mars | C925 | QHY716MC",
                 url: "2026/mars-2025-01-12.png",
-                category: "PLANET"
+                category: "PLANET",
+                sort: 3
             },
             {
-                title: "Jupiter Transition",
-                meta: "Aspect Comparison | changing aspect of Jup.png",
-                url: "2026/changing aspect of Jup.png",
-                category: "PLANET"
-            },
-            {
-                title: "Jupiter - 2026.01.14",
-                meta: "Opposition Phase | jup-2026-01-14.png",
-                url: "2026/jup-2026-01-14.png",
-                category: "PLANET"
+                title: "Solar System Overview",
+                meta: "Composited view | 16:9",
+                url: "2026/solar system in 2025 16_9.jpg",
+                category: "PLANET",
+                sort: 4
             },
             {
                 title: "Jupiter - 2025.12.17",
-                meta: "Winter Observation | jup-2025-12-17.png",
+                meta: "Jupiter | C925 | QHY716MC",
                 url: "2026/jup-2025-12-17.png",
-                category: "PLANET"
+                category: "PLANET",
+                sort: 5
+            },
+            {
+                title: "Jupiter - 2025.11.21",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2025-11-21.png",
+                category: "PLANET",
+                sort: 6
+            },
+            {
+                title: "Jupiter - 2025.11.04",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2025-11-04.png",
+                category: "PLANET",
+                sort: 7
+            },
+            {
+                title: "Jupiter - 2026.01.14",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2026-01-14.png",
+                category: "PLANET",
+                sort: 8
+            },
+            {
+                title: "Jupiter - 2026.03.13",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2026-03-13.png",
+                category: "PLANET",
+                sort: 9
+            },
+            {
+                title: "Jupiter - 2026.04.04",
+                meta: "Jupiter | C925 | QHY716MC",
+                url: "2026/jup-2026-04-04.png",
+                category: "PLANET",
+                sort: 11
+            },
+            {
+                title: "M78 Reflection Nebula",
+                meta: "M78 | Deep Sky",
+                url: "2026/M78.jpg",
+                category: "NEBULA",
+                sort: 1
+            },
+            {
+                title: "C/2024 E3 Tsuchinshan",
+                meta: "Comet | Deep Sky",
+                url: "2026/C2024-E3-Tsuchinshan-2024-10-23-ed2.jpg",
+                category: "COMETS",
+                sort: 1
             }
         ];
 
@@ -332,12 +389,39 @@
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
 
+        function shufflePhotos(items) {
+            const copy = items.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function getHomePhotos(limit = 6) {
+            const buckets = categoryOrder
+                .map(category => shufflePhotos(photos.filter(photo => photo.category === category)))
+                .filter(bucket => bucket.length > 0);
+            const selected = [];
+
+            while (selected.length < limit && buckets.some(bucket => bucket.length > 0)) {
+                for (const bucket of buckets) {
+                    if (bucket.length === 0 || selected.length >= limit) {
+                        continue;
+                    }
+                    selected.push(bucket.shift());
+                }
+            }
+
+            return selected;
+        }
+
         function renderPhotos(filter = 'ALL') {
             gallery.innerHTML = '';
-            const filtered = filter === 'ALL' ? photos : photos.filter(p => p.category === filter);
-            
+            const filtered = filter === 'ALL' ? getHomePhotos(6) : photos.filter(p => p.category === filter);
+
             if (filtered.length === 0) {
-                gallery.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 50px;">No images in this category yet.</p>`;
+                gallery.innerHTML = `<p style="text-align: center; color: var(--text-dim); padding: 50px 20px;">No images in this category yet.</p>`;
                 return;
             }
 
@@ -345,7 +429,7 @@
                 const card = document.createElement('div');
                 card.className = 'photo-card';
                 card.innerHTML = `
-                    <img src="${photo.url}" alt="${photo.title}" loading="lazy">
+                    <img src="${photo.url}" alt="${photo.title}" loading="lazy" decoding="async">
                     <div class="photo-info">
                         <div class="photo-title">${photo.title}</div>
                         <div class="photo-meta">${photo.meta}</div>
