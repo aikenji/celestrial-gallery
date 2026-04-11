@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stellar Gallery | Astrophotography Portfolio</title>
     <!-- Elegant Serif Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050506; /* Even deeper black for contrast */
+            --bg-color: #050506; 
             --text-main: #e0e0e0;
             --text-dim: #888;
-            --accent: #c5a059; /* Muted gold */
+            --accent: #c5a059; 
             --spacing: 2rem;
         }
 
@@ -57,7 +57,7 @@
 
         /* Elegant Header Section */
         header {
-            height: 60vh;
+            height: 50vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -88,6 +88,49 @@
             animation: fadeInUp 1.2s 0.3s forwards;
         }
 
+        /* Navigation Menu */
+        nav {
+            margin-top: 40px;
+            display: flex;
+            gap: 30px;
+            opacity: 0;
+            animation: fadeInUp 1.2s 0.6s forwards;
+        }
+
+        .nav-item {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(-50%);
+        }
+
+        .nav-item:hover::after, .nav-item.active::after {
+            width: 100%;
+        }
+
         /* Photo Grid Layout */
         .gallery {
             max-width: 1400px;
@@ -115,17 +158,17 @@
 
         .photo-card img {
             width: 100%;
-            max-width: 1200px; /* Constrain to your requested width */
             height: 600px;
-            object-fit: contain; /* Better for planet shots to show the whole disk */
+            object-fit: cover; /* Wallpaper-style fill */
             display: block;
             margin: 0 auto;
             filter: grayscale(5%) brightness(90%);
-            transition: filter 0.6s ease;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
             background: #000;
         }
 
         .photo-card:hover img {
+            transform: scale(1.05);
             filter: grayscale(0%) brightness(100%);
         }
 
@@ -148,7 +191,7 @@
             letter-spacing: 0.1rem;
         }
 
-        /* Lightbox Effect (Click to expand) */
+        /* Lightbox Effect */
         #lightbox {
             position: fixed;
             top: 0;
@@ -169,7 +212,6 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             to {
                 opacity: 1;
@@ -188,6 +230,7 @@
 
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
+            nav { gap: 15px; flex-wrap: wrap; justify-content: center; }
             .gallery { grid-template-columns: 1fr; }
             .photo-card img { height: 400px; }
         }
@@ -195,13 +238,18 @@
 </head>
 <body>
 
-    <!-- Stars Layer -->
     <div class="stars-container" id="stars-container"></div>
 
     <header>
         <div class="subtitle">Aiken Astrophotography</div>
-        <h1>CELESTIAL GALLERY</h1>
-        <div style="width: 40px; height: 1px; background: var(--accent); margin-top: 20px;"></div>
+        <h1>CELETIAL GALLERY </h1>
+        <nav>
+            <button class="nav-item active" onclick="filterPhotos('ALL')">Home</button>
+            <button class="nav-item" onclick="filterPhotos('PLANET')">Planet</button>
+            <button class="nav-item" onclick="filterPhotos('NEBULA')">Nebula</button>
+            <button class="nav-item" onclick="filterPhotos('GALAXY')">Galaxy</button>
+            <button class="nav-item" onclick="filterPhotos('COMETS')">Comets</button>
+        </nav>
     </header>
 
     <main class="gallery" id="gallery">
@@ -221,63 +269,62 @@
         function createStars() {
             const container = document.getElementById('stars-container');
             const starCount = 150;
-            
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
-                
                 const size = Math.random() * 2 + 1 + 'px';
                 const x = Math.random() * 100 + '%';
                 const y = Math.random() * 100 + '%';
                 const duration = Math.random() * 3 + 2 + 's';
                 const delay = Math.random() * 5 + 's';
-                
                 star.style.width = size;
                 star.style.height = size;
                 star.style.left = x;
                 star.style.top = y;
                 star.style.setProperty('--duration', duration);
                 star.style.animationDelay = delay;
-                
                 container.appendChild(star);
             }
         }
         createStars();
 
-        /* 
-           PHOTO CONFIGURATION
-           Pointing to your local "2026/" folder.
-        */
+        // Photo Configuration with categories
         const photos = [
             {
                 title: "Lunar Surface Detail",
                 meta: "High Res Moon | luna.png",
-                url: "2026/luna.png"
+                url: "2026/luna.png",
+                category: "PLANET"
             },
             {
                 title: "Jupiter - 2026.04.04",
                 meta: "Planetary Imaging | jup-2026-04-04.png",
-                url: "2026/jup-2026-04-04.png"
+                url: "2026/jup-2026-04-04.png",
+                category: "PLANET"
             },
             {
                 title: "Mars - 2025.01.12",
                 meta: "The Red Planet | mars-2025-01-12.png",
-                url: "2026/mars-2025-01-12.png"
+                url: "2026/mars-2025-01-12.png",
+                category: "PLANET"
             },
             {
                 title: "Jupiter Transition",
                 meta: "Aspect Comparison | changing aspect of Jup.png",
-                url: "2026/changing aspect of Jup.png"
+                url: "2026/changing aspect of Jup.png",
+                category: "PLANET"
             },
             {
                 title: "Jupiter - 2026.01.14",
                 meta: "Opposition Phase | jup-2026-01-14.png",
-                url: "2026/jup-2026-01-14.png"
+                url: "2026/jup-2026-01-14.png",
+                category: "PLANET"
             },
             {
                 title: "Jupiter - 2025.12.17",
                 meta: "Winter Observation | jup-2025-12-17.png",
-                url: "2026/jup-2025-12-17.png"
+                url: "2026/jup-2025-12-17.png",
+                category: "PLANET"
             }
         ];
 
@@ -285,25 +332,46 @@
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
 
-        // Dynamically generate the gallery
-        photos.forEach(photo => {
-            const card = document.createElement('div');
-            card.className = 'photo-card';
-            card.innerHTML = `
-                <img src="${photo.url}" alt="${photo.title}" loading="lazy">
-                <div class="photo-info">
-                    <div class="photo-title">${photo.title}</div>
-                    <div class="photo-meta">${photo.meta}</div>
-                </div>
-            `;
+        function renderPhotos(filter = 'ALL') {
+            gallery.innerHTML = '';
+            const filtered = filter === 'ALL' ? photos : photos.filter(p => p.category === filter);
             
-            card.onclick = () => {
-                lightboxImg.src = photo.url;
-                lightbox.style.display = 'flex';
-            };
-            
-            gallery.appendChild(card);
-        });
+            if (filtered.length === 0) {
+                gallery.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 50px;">No images in this category yet.</p>`;
+                return;
+            }
+
+            filtered.forEach(photo => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.title}" loading="lazy">
+                    <div class="photo-info">
+                        <div class="photo-title">${photo.title}</div>
+                        <div class="photo-meta">${photo.meta}</div>
+                    </div>
+                `;
+                card.onclick = () => {
+                    lightboxImg.src = photo.url;
+                    lightbox.style.display = 'flex';
+                };
+                gallery.appendChild(card);
+            });
+        }
+
+        function filterPhotos(category) {
+            // Update active state in UI
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.innerText.toUpperCase() === category.toUpperCase() || (category === 'ALL' && btn.innerText.toUpperCase() === 'HOME')) {
+                    btn.classList.add('active');
+                }
+            });
+            renderPhotos(category);
+        }
+
+        // Initial render
+        renderPhotos();
     </script>
 </body>
 </html>
