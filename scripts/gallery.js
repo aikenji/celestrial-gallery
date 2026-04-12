@@ -4,6 +4,7 @@
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const navGroup = document.getElementById('nav-group');
+    const galleryLogo = document.querySelector('header h1');
 
     let currentCategory = 'ALL';
     let currentSubcategory = null;
@@ -69,9 +70,12 @@
         }));
     }
 
-    function createNavButton(label, onClick, isActive = false, ariaLabel = '', index = 0) {
+    function createNavButton(label, onClick, isActive = false, ariaLabel = '', index = 0, extraClass = '') {
         const button = document.createElement('button');
         button.className = 'nav-item';
+        if (extraClass) {
+            button.classList.add(extraClass);
+        }
         button.type = 'button';
         button.textContent = label;
         button.setAttribute('aria-label', ariaLabel || label);
@@ -97,7 +101,8 @@
             ['Planets', 'PLANETS'],
             ['Nebulae', 'NEBULAE'],
             ['Galaxies', 'GALAXIES'],
-            ['Comets', 'COMETS']
+            ['Comets', 'COMETS'],
+            ['P.L.A.Y', 'PLAY']
         ];
 
         items.forEach(([label, value], index) => {
@@ -120,21 +125,14 @@
             return;
         }
 
-        navGroup.appendChild(createNavButton(
-            '↩ Return',
-            () => filterPhotos('ALL'),
-            false,
-            'Back to main categories',
-            0
-        ));
-
         order.forEach((subcategory, index) => {
             navGroup.appendChild(createNavButton(
                 subcategory,
                 () => filterPhotos(category, subcategory),
                 activeSubcategory === subcategory,
                 subcategory,
-                index + 1
+                index + 1,
+                category === 'PLAY' ? 'nav-item-meta' : ''
             ));
         });
     }
@@ -241,6 +239,15 @@
     }
 
     window.filterPhotos = filterPhotos;
+    galleryLogo.setAttribute('role', 'button');
+    galleryLogo.setAttribute('tabindex', '0');
+    galleryLogo.addEventListener('click', () => filterPhotos('ALL'));
+    galleryLogo.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            filterPhotos('ALL');
+        }
+    });
     createStars();
     renderMainNav('ALL');
     renderPhotos();

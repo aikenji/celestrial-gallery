@@ -1,6 +1,7 @@
-const categoryOrder = ['PLANETS', 'NEBULAE', 'GALAXIES', 'COMETS'];
+const categoryOrder = ['PLANETS', 'NEBULAE', 'GALAXIES', 'COMETS', 'PLAY'];
 const subcategoryOrder = {
-    PLANETS: ['JUPITER', 'MERCURY', 'MARS', 'SATURN', 'URANUS', 'NEPTUNE', 'MOON', 'OVERVIEW']
+    PLANETS: ['JUPITER', 'SATURN', 'MARS', 'MERCURY', 'URANUS', 'NEPTUNE', 'MOON', 'OVERVIEW'],
+    PLAY: ['2026.01.27']
 };
 
 const photosByCategory = {
@@ -115,6 +116,22 @@ const photosByCategory = {
                 meta: 'Neptune | C925 | QHY715MC',
                 url: 'library/nep-2025-08-22 ed2.jpg',
                 sort: 1
+            }
+        ]
+    },
+    PLAY: {
+        '2026.01.27': [
+            {
+                title: 'Members',
+                meta: 'P.L.A.Y | 2026.01.27',
+                url: 'library/P.L.A.Y/2026-01-27/members.JPG',
+                sort: 1
+            },
+            {
+                title: 'Telescopes',
+                meta: 'P.L.A.Y | 2026.01.27',
+                url: 'library/P.L.A.Y/2026-01-27/telescopes.JPG',
+                sort: 2
             }
         ]
     },

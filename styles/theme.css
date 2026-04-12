@@ -68,6 +68,13 @@ h1 {
     transform: translateY(20px);
     animation: fadeInUp 1.2s forwards;
     text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+h1:hover {
+    color: var(--accent);
+    transform: translateY(0) scale(1.02);
 }
 
 .subtitle {
@@ -116,6 +123,19 @@ nav {
 .nav-item.active {
     color: var(--accent);
     transform: translateY(-1px);
+}
+
+.nav-item-meta {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-main);
+}
+
+.nav-item-meta:hover,
+.nav-item-meta.active {
+    color: var(--accent);
 }
 
 .nav-item::after {
