@@ -44,10 +44,20 @@
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
 }
 
+.photo-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 5px;
+}
+
 .photo-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
-    margin-bottom: 5px;
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .photo-meta {
@@ -55,6 +65,46 @@
     color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.1rem;
+}
+
+.like-button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(5, 5, 6, 0.6);
+    color: var(--text-main);
+    cursor: pointer;
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease;
+}
+
+.like-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(197, 160, 89, 0.45);
+}
+
+.like-button.liked {
+    color: #ff6b81;
+    border-color: rgba(255, 107, 129, 0.5);
+    background: rgba(255, 107, 129, 0.12);
+}
+
+.like-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.like-count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    min-width: 1ch;
 }
 
 @media (max-width: 768px) {
@@ -74,5 +124,13 @@
 
     .photo-card img {
         height: 400px;
+    }
+
+    .photo-title {
+        font-size: 1.1rem;
+    }
+
+    .like-button {
+        padding: 3px 7px;
     }
 }

@@ -5,9 +5,11 @@
     const lightboxImg = document.getElementById('lightbox-img');
     const navGroup = document.getElementById('nav-group');
     const galleryLogo = document.querySelector('header h1');
+    const likeStorageKey = 'astro-gallery-like-state-v1';
 
     let currentCategory = 'ALL';
     let currentSubcategory = null;
+    let likeState = loadLikeState();
 
     function createStars() {
         const container = document.getElementById('stars-container');
@@ -38,6 +40,67 @@
             [copy[i], copy[j]] = [copy[j], copy[i]];
         }
         return copy;
+    }
+
+    function loadLikeState() {
+        try {
+            const raw = window.localStorage.getItem(likeStorageKey);
+            if (!raw) {
+                return { counts: {}, liked: {} };
+            }
+
+            const parsed = JSON.parse(raw);
+            return {
+                counts: parsed.counts || {},
+                liked: parsed.liked || {}
+            };
+        } catch (error) {
+            return { counts: {}, liked: {} };
+        }
+    }
+
+    function saveLikeState() {
+        try {
+            window.localStorage.setItem(likeStorageKey, JSON.stringify(likeState));
+        } catch (error) {
+            // Ignore storage failures so the gallery still works without persistence.
+        }
+    }
+
+    function getPhotoLikeKey(photo) {
+        return photo.url;
+    }
+
+    function getPhotoLikeCount(photo) {
+        return likeState.counts[getPhotoLikeKey(photo)] || 0;
+    }
+
+    function isPhotoLiked(photo) {
+        return Boolean(likeState.liked[getPhotoLikeKey(photo)]);
+    }
+
+    function updateLikeButton(button, photo) {
+        const liked = isPhotoLiked(photo);
+        const count = getPhotoLikeCount(photo);
+        const icon = button.querySelector('.like-icon');
+        const countNode = button.querySelector('.like-count');
+
+        button.classList.toggle('liked', liked);
+        button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+        icon.textContent = liked ? '♥' : '♡';
+        countNode.textContent = count;
+    }
+
+    function toggleLike(photo, button) {
+        const key = getPhotoLikeKey(photo);
+        const nextLiked = !Boolean(likeState.liked[key]);
+        const currentCount = getPhotoLikeCount(photo);
+        const nextCount = nextLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+
+        likeState.liked[key] = nextLiked;
+        likeState.counts[key] = nextCount;
+        saveLikeState();
+        updateLikeButton(button, photo);
     }
 
     function getCategoryPhotos(category, subcategory = null) {
@@ -175,10 +238,22 @@
             card.innerHTML = `
                 <img src="${photo.url}" alt="${photo.title}" loading="lazy" decoding="async">
                 <div class="photo-info">
-                    <div class="photo-title">${photo.title}</div>
+                    <div class="photo-header">
+                        <div class="photo-title">${photo.title}</div>
+                        <button class="like-button" type="button" aria-label="Like ${photo.title}" aria-pressed="false">
+                            <span class="like-icon" aria-hidden="true"></span>
+                            <span class="like-count"></span>
+                        </button>
+                    </div>
                     <div class="photo-meta">${photo.meta}</div>
                 </div>
             `;
+            const likeButton = card.querySelector('.like-button');
+            updateLikeButton(likeButton, photo);
+            likeButton.addEventListener('click', event => {
+                event.stopPropagation();
+                toggleLike(photo, likeButton);
+            });
             card.onclick = () => {
                 lightboxImg.src = photo.url;
                 lightbox.style.display = 'flex';
