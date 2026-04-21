@@ -1,11 +1,28 @@
 (() => {
-    const { categoryOrder, subcategoryOrder = {}, photos, photosByCategory } = window.galleryData;
+    const { categoryOrder, categoryLabels = {}, photos } = window.galleryData;
     const gallery = document.getElementById('gallery');
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const navGroup = document.getElementById('nav-group');
     const galleryLogo = document.querySelector('header h1');
     const likeStorageKey = 'astro-gallery-like-state-v1';
+
+    const subcategoryLabels = {
+        JUPITER: 'Jupiter',
+        SATURN: 'Saturn',
+        MARS: 'Mars',
+        MERCURY: 'Mercury',
+        URANUS: 'Uranus',
+        NEPTUNE: 'Neptune',
+        MOON: 'Moon',
+        OVERVIEW: 'Overview',
+        '2026.01.27': '2026.01.27'
+    };
+
+    const subcategoryOrders = {
+        PLANETS: ['JUPITER', 'SATURN', 'MARS', 'MERCURY', 'URANUS', 'NEPTUNE', 'MOON', 'OVERVIEW'],
+        PLAY: ['2026.01.27']
+    };
 
     let currentCategory = 'ALL';
     let currentSubcategory = null;
@@ -104,33 +121,11 @@
     }
 
     function getCategoryPhotos(category, subcategory = null) {
-        const categoryPhotos = photosByCategory?.[category];
-        if (!categoryPhotos) {
-            return [];
-        }
-
-        if (Array.isArray(categoryPhotos)) {
-            return categoryPhotos.map(photo => ({
-                ...photo,
-                category
-            }));
-        }
-
-        if (!subcategory) {
-            return Object.entries(categoryPhotos).flatMap(([key, items]) =>
-                items.map(item => ({
-                    ...item,
-                    category,
-                    subcategory: key
-                }))
-            );
-        }
-
-        return (categoryPhotos[subcategory] || []).map(item => ({
-            ...item,
-            category,
-            subcategory
-        }));
+        return photos.filter(photo =>
+            Array.isArray(photo.tags)
+            && photo.tags.includes(category)
+            && (subcategory === null || photo.tags.includes(subcategory))
+        );
     }
 
     function createNavButton(label, onClick, isActive = false, ariaLabel = '', index = 0, extraClass = '') {
@@ -161,11 +156,7 @@
 
         const items = [
             ['Home', 'ALL'],
-            ['Planets', 'PLANETS'],
-            ['Nebulae', 'NEBULAE'],
-            ['Galaxies', 'GALAXIES'],
-            ['Comets', 'COMETS'],
-            ['P.L.A.Y', 'PLAY']
+            ...categoryOrder.map(category => [categoryLabels[category] || category, category])
         ];
 
         items.forEach(([label, value], index) => {
@@ -179,39 +170,55 @@
         });
     }
 
-    function renderSubcategoryNav(category, activeSubcategory = 'ALL') {
+    function renderSubcategoryNav(category, activeSubcategory = null) {
         navGroup.innerHTML = '';
 
-        const order = subcategoryOrder[category];
+        const order = subcategoryOrders[category];
         if (!order || order.length === 0) {
             renderMainNav(category);
             return;
         }
 
         order.forEach((subcategory, index) => {
+            if (getCategoryPhotos(category, subcategory).length === 0) {
+                return;
+            }
+
             navGroup.appendChild(createNavButton(
-                subcategory,
+                subcategoryLabels[subcategory] || subcategory,
                 () => filterPhotos(category, subcategory),
                 activeSubcategory === subcategory,
-                subcategory,
-                index + 1,
-                category === 'PLAY' ? 'nav-item-meta' : ''
+                subcategoryLabels[subcategory] || subcategory,
+                index + 1
             ));
         });
     }
 
     function getHomePhotos(limit = 4) {
-        const buckets = categoryOrder
+        const homeCategories = categoryOrder.filter(category => category !== 'MESSIER');
+        const buckets = homeCategories
             .map(category => shufflePhotos(getCategoryPhotos(category)))
             .filter(bucket => bucket.length > 0);
         const selected = [];
+        const seen = new Set();
 
         while (selected.length < limit && buckets.some(bucket => bucket.length > 0)) {
             for (const bucket of buckets) {
+                while (bucket.length > 0 && seen.has(bucket[0].url)) {
+                    bucket.shift();
+                }
+
                 if (bucket.length === 0 || selected.length >= limit) {
                     continue;
                 }
-                selected.push(bucket.shift());
+
+                const photo = bucket.shift();
+                if (seen.has(photo.url)) {
+                    continue;
+                }
+
+                seen.add(photo.url);
+                selected.push(photo);
             }
         }
 
@@ -263,54 +270,31 @@
     }
 
     function filterPhotos(category, subcategory = null) {
-        const previousCategory = currentCategory;
-        const previousSubcategory = currentSubcategory;
+        currentCategory = category;
+        currentSubcategory = subcategory;
 
         if (category === 'ALL') {
-            currentCategory = 'ALL';
-            currentSubcategory = null;
             renderMainNav('ALL');
             renderPhotos('ALL');
             return;
         }
 
-        const order = subcategoryOrder[category];
-        const firstSubcategory = order && order.length > 0 ? order[0] : null;
-
-        if (subcategory === null) {
-            currentCategory = category;
-            currentSubcategory = firstSubcategory;
-
-            if (firstSubcategory) {
-                renderSubcategoryNav(category, firstSubcategory);
-                renderPhotos(category, firstSubcategory);
-            } else {
-                if (subcategoryOrder[previousCategory]?.length > 0) {
-                    renderMainNav(category);
-                } else {
-                    setActiveNavButton(category);
-                }
-                renderPhotos(category, null);
-            }
-
+        const order = subcategoryOrders[category];
+        if (order && subcategory === null) {
+            const firstSubcategory = order.find(name => getCategoryPhotos(category, name).length > 0) || null;
+            renderSubcategoryNav(category, firstSubcategory);
+            renderPhotos(category, firstSubcategory);
             return;
         }
 
-        if (previousCategory === category) {
-            if (previousSubcategory === subcategory) {
-                return;
-            }
-
-            currentSubcategory = subcategory;
-            setActiveNavButton(subcategory);
+        if (order && subcategory !== null) {
+            renderSubcategoryNav(category, subcategory);
             renderPhotos(category, subcategory);
             return;
         }
 
-        currentCategory = category;
-        currentSubcategory = subcategory;
-        renderSubcategoryNav(category, subcategory);
-        renderPhotos(category, subcategory);
+        setActiveNavButton(category);
+        renderPhotos(category);
     }
 
     window.filterPhotos = filterPhotos;
