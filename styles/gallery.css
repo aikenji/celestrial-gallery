@@ -8,6 +8,11 @@
     position: relative;
 }
 
+.gallery.gallery-messier {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
+}
+
 .photo-card {
     position: relative;
     cursor: pointer;
@@ -37,6 +42,10 @@
 .photo-card:hover img {
     transform: scale(1.05);
     filter: grayscale(0%) brightness(100%);
+}
+
+.photo-card-messier img {
+    aspect-ratio: 1 / 1;
 }
 
 .photo-info {
@@ -123,7 +132,17 @@
         grid-template-columns: 1fr;
     }
 
+    .gallery.gallery-messier {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
     .photo-card img {
+        height: 400px;
+        aspect-ratio: auto;
+    }
+
+    .photo-card-messier img {
         height: 400px;
         aspect-ratio: auto;
     }

@@ -186,6 +186,13 @@ const photos = [
         tags: ['COMETS']
     },
     {
+        title: 'C/2025 R3 PanSTARRS',
+        meta: 'Deep Sky | 2026-04-19',
+        url: 'library/C2025R3_Panstarrs-2026-04-19.jpg',
+        sort: 3,
+        tags: ['COMETS']
+    },
+    {
         title: 'Members',
         meta: 'P.L.A.Y | 2026.01.27',
         url: 'library/P.L.A.Y/2026-01-27/members.JPG',

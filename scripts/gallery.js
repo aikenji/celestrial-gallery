@@ -227,6 +227,7 @@
 
     function renderPhotos(category = 'ALL', subcategory = null) {
         gallery.innerHTML = '';
+        gallery.classList.toggle('gallery-messier', category === 'MESSIER');
 
         const items = category === 'ALL'
             ? getHomePhotos(4)
@@ -241,9 +242,9 @@
 
         items.forEach(photo => {
             const card = document.createElement('div');
-            card.className = 'photo-card';
+            card.className = category === 'MESSIER' ? 'photo-card photo-card-messier' : 'photo-card';
             card.innerHTML = `
-                <img src="${photo.url}" alt="${photo.title}" loading="lazy" decoding="async">
+                <img src="${photo.thumbnailUrl || photo.url}" alt="${photo.title}" loading="lazy" decoding="async" style="object-position: ${photo.thumbnailFocus || 'center center'};">
                 <div class="photo-info">
                     <div class="photo-header">
                         <div class="photo-title">${photo.title}</div>
