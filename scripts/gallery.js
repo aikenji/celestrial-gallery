@@ -4,7 +4,9 @@
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const navGroup = document.getElementById('nav-group');
-    const galleryLogo = document.querySelector('header h1');
+    const subtitle = document.querySelector('header .subtitle');
+    const galleryLogo = document.getElementById('gallery-title');
+    const titleCurrent = galleryLogo.querySelector('.title-layer-current');
     const likeStorageKey = 'astro-gallery-like-state-v1';
 
     const subcategoryLabels = {
@@ -27,6 +29,8 @@
     let currentCategory = 'ALL';
     let currentSubcategory = null;
     let likeState = loadLikeState();
+    let isMessierMode = false;
+    let subtitleTransitionTimer = null;
 
     function createStars() {
         const container = document.getElementById('stars-container');
@@ -57,6 +61,19 @@
             [copy[i], copy[j]] = [copy[j], copy[i]];
         }
         return copy;
+    }
+
+    function getMessierSortValue(photo) {
+        const source = `${photo.title || ''} ${photo.meta || ''} ${photo.url || ''}`;
+        const matches = [...source.matchAll(/M\s*(\d{1,3})/gi)]
+            .map(match => Number(match[1]))
+            .filter(Number.isFinite);
+
+        if (matches.length > 0) {
+            return Math.min(...matches);
+        }
+
+        return Number.MAX_SAFE_INTEGER;
     }
 
     function loadLikeState() {
@@ -154,6 +171,10 @@
     function renderMainNav(activeCategory = 'ALL') {
         navGroup.innerHTML = '';
 
+        if (isMessierMode) {
+            return;
+        }
+
         const items = [
             ['Home', 'ALL'],
             ...categoryOrder.map(category => [categoryLabels[category] || category, category])
@@ -233,7 +254,16 @@
             ? getHomePhotos(4)
             : getCategoryPhotos(category, subcategory)
                 .slice()
-                .sort((a, b) => (a.sort || 0) - (b.sort || 0));
+                .sort((a, b) => {
+                    if (category === 'MESSIER') {
+                        const messierDiff = getMessierSortValue(a) - getMessierSortValue(b);
+                        if (messierDiff !== 0) {
+                            return messierDiff;
+                        }
+                    }
+
+                    return (a.sort || 0) - (b.sort || 0) || (a.title || '').localeCompare(b.title || '');
+                });
 
         if (items.length === 0) {
             gallery.innerHTML = '<p style="text-align: center; color: var(--text-dim); padding: 50px 20px;">No images in this category yet.</p>';
@@ -270,9 +300,71 @@
         });
     }
 
+    function updateHeaderState(category) {
+        isMessierMode = category === 'MESSIER';
+        transitionSubtitle();
+        syncNavState(!isMessierMode);
+        galleryLogo.classList.toggle('clickable-title', isMessierMode);
+    }
+
+    function replayIntroLine(element, animationValue) {
+        element.style.display = '';
+        element.style.animation = 'none';
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        void element.offsetWidth;
+        element.style.animation = animationValue;
+    }
+
+    function transitionSubtitle() {
+        if (subtitleTransitionTimer) {
+            window.clearTimeout(subtitleTransitionTimer);
+            subtitleTransitionTimer = null;
+        }
+
+        subtitle.classList.add('subtitle-hidden');
+        subtitle.style.animation = 'none';
+        void subtitle.offsetWidth;
+        subtitle.classList.remove('subtitle-hidden');
+        subtitle.style.animation = 'fadeInUp 1.2s 0.3s forwards';
+        subtitleTransitionTimer = window.setTimeout(() => {
+            subtitleTransitionTimer = null;
+        }, 1250);
+    }
+
+    function syncNavState(visible) {
+        if (visible) {
+            navGroup.classList.remove('nav-hidden');
+            navGroup.classList.remove('nav-exiting');
+            navGroup.style.animation = 'none';
+            void navGroup.offsetWidth;
+            navGroup.style.animation = 'fadeInUp 1.2s 0.6s forwards';
+            return;
+        }
+
+        navGroup.classList.add('nav-exiting');
+        navGroup.classList.add('nav-hidden');
+        navGroup.style.animation = '';
+    }
+
+    function replayGalleryTitle(nextTitle) {
+        if (titleCurrent.textContent === nextTitle) {
+            return;
+        }
+
+        titleCurrent.style.animation = 'none';
+        titleCurrent.style.opacity = '0';
+        titleCurrent.style.transform = 'translateY(20px)';
+        titleCurrent.textContent = nextTitle;
+        void titleCurrent.offsetWidth;
+        titleCurrent.style.animation = 'fadeInUp 1.2s forwards';
+    }
+
     function filterPhotos(category, subcategory = null) {
         currentCategory = category;
         currentSubcategory = subcategory;
+        updateHeaderState(category);
+        replayGalleryTitle(category === 'MESSIER' ? 'MESSIER CATALOG' : 'CELESTIAL GALLERY');
 
         if (category === 'ALL') {
             renderMainNav('ALL');
@@ -291,6 +383,11 @@
         if (order && subcategory !== null) {
             renderSubcategoryNav(category, subcategory);
             renderPhotos(category, subcategory);
+            return;
+        }
+
+        if (category === 'MESSIER') {
+            renderPhotos(category);
             return;
         }
 
