@@ -10,7 +10,7 @@
 
 .gallery.gallery-messier {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 24px;
+    gap: 0;
 }
 
 .photo-card {
@@ -149,7 +149,7 @@
 
     .gallery.gallery-messier {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 0;
     }
 
     .photo-media {
@@ -163,11 +163,11 @@
     }
 
     .gallery.gallery-messier .photo-meta {
-        display: none;
+        display: none !important;
     }
 
     .gallery.gallery-messier .like-button {
-        display: none;
+        display: none !important;
     }
 
     .gallery.gallery-messier .photo-header {
