@@ -172,38 +172,59 @@ const photos = [
         tags: ['GALAXIES', 'MESSIER']
     },
     {
+        title: 'M84',
+        meta: 'Galaxy | Messier 84',
+        url: 'library/Messier catalog/M84.jpg',
+        sort: 7,
+        tags: ['GALAXIES', 'MESSIER']
+    },
+    {
+        title: 'M86',
+        meta: 'Galaxy | Messier 86',
+        url: 'library/Messier catalog/M86.jpg',
+        sort: 8,
+        tags: ['GALAXIES', 'MESSIER']
+    },
+    {
+        title: 'M87',
+        meta: 'Galaxy | Messier 87',
+        url: 'library/Messier catalog/M87.jpg',
+        sort: 9,
+        tags: ['GALAXIES', 'MESSIER']
+    },
+    {
         title: 'M101',
         meta: 'Pinwheel Galaxy | Messier 101',
         url: 'library/Messier catalog/M101.jpg',
-        sort: 7,
+        sort: 10,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M104',
         meta: 'Sombrero Galaxy | Messier 104',
         url: 'library/Messier catalog/M104.jpg',
-        sort: 8,
+        sort: 11,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M110',
         meta: 'Satellite Galaxy | Messier 110',
         url: 'library/Messier catalog/M110.jpg',
-        sort: 9,
+        sort: 12,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'Markarian Chain',
-        meta: 'M84 / M86 / M87 | Virgo Cluster | Messier target',
+        meta: 'M84 / M86 / M87 | Virgo Cluster',
         url: 'library/MarkarianChain.jpg',
-        sort: 10,
+        sort: 13,
         tags: ['GALAXIES']
     },
     {
         title: 'Leo Triplet',
-        meta: 'M65 / M66 / NGC 3628 | Leo Triplet',
-        url: 'library/Leo Triplet.jpg',
-        sort: 11,
+        meta: 'M65/M66/NGC 3628',
+        url: 'library/LeoTriplet.jpg',
+        sort: 14,
         tags: ['GALAXIES']
     },
     {

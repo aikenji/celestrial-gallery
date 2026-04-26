@@ -163,11 +163,11 @@
     }
 
     .gallery.gallery-messier .photo-meta {
-        display: none;
+        display: none !important;
     }
 
     .gallery.gallery-messier .like-button {
-        display: none;
+        display: none !important;
     }
 
     .gallery.gallery-messier .photo-header {
