@@ -273,25 +273,32 @@
         items.forEach(photo => {
             const card = document.createElement('div');
             card.className = category === 'MESSIER' ? 'photo-card photo-card-messier' : 'photo-card';
+            const isMobileMessier = category === 'MESSIER' && window.matchMedia('(max-width: 768px)').matches;
             card.innerHTML = `
-                <img src="${photo.thumbnailUrl || photo.url}" alt="${photo.title}" loading="lazy" decoding="async" style="object-position: ${photo.thumbnailFocus || 'center center'};">
+                <div class="photo-media ${category === 'MESSIER' ? 'photo-media-messier' : ''}">
+                    <img src="${photo.thumbnailUrl || photo.url}" alt="${photo.title}" loading="lazy" decoding="async" style="object-position: ${photo.thumbnailFocus || 'center center'};">
+                </div>
                 <div class="photo-info">
                     <div class="photo-header">
                         <div class="photo-title">${photo.title}</div>
+                        ${isMobileMessier ? '' : `
                         <button class="like-button" type="button" aria-label="Like ${photo.title}" aria-pressed="false">
                             <span class="like-icon" aria-hidden="true"></span>
                             <span class="like-count"></span>
                         </button>
+                        `}
                     </div>
-                    <div class="photo-meta">${photo.meta}</div>
+                    ${isMobileMessier ? '' : `<div class="photo-meta">${photo.meta}</div>`}
                 </div>
             `;
             const likeButton = card.querySelector('.like-button');
-            updateLikeButton(likeButton, photo);
-            likeButton.addEventListener('click', event => {
-                event.stopPropagation();
-                toggleLike(photo, likeButton);
-            });
+            if (likeButton) {
+                updateLikeButton(likeButton, photo);
+                likeButton.addEventListener('click', event => {
+                    event.stopPropagation();
+                    toggleLike(photo, likeButton);
+                });
+            }
             card.onclick = () => {
                 lightboxImg.src = photo.url;
                 lightbox.style.display = 'flex';

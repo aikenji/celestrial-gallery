@@ -137,59 +137,73 @@ const photos = [
         tags: ['GALAXIES', 'MESSIER']
     },
     {
+        title: 'M32',
+        meta: 'Satellite Galaxy | Messier 32',
+        url: 'library/Messier catalog/M32.jpg',
+        sort: 2,
+        tags: ['GALAXIES', 'MESSIER']
+    },
+    {
         title: 'M65',
         meta: 'Galaxy | Messier 65',
         url: 'library/Messier catalog/M65.jpg',
-        sort: 2,
+        sort: 3,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M66',
         meta: 'Galaxy | Messier 66',
         url: 'library/Messier catalog/M66.jpg',
-        sort: 3,
+        sort: 4,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M81',
         meta: 'Bode\'s Galaxy | Messier 81',
         url: 'library/Messier catalog/M81.jpg',
-        sort: 4,
+        sort: 5,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M82',
         meta: 'Cigar Galaxy | Messier 82',
         url: 'library/Messier catalog/M82.jpg',
-        sort: 5,
+        sort: 6,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M101',
         meta: 'Pinwheel Galaxy | Messier 101',
         url: 'library/Messier catalog/M101.jpg',
-        sort: 6,
+        sort: 7,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'M104',
         meta: 'Sombrero Galaxy | Messier 104',
         url: 'library/Messier catalog/M104.jpg',
-        sort: 7,
+        sort: 8,
+        tags: ['GALAXIES', 'MESSIER']
+    },
+    {
+        title: 'M110',
+        meta: 'Satellite Galaxy | Messier 110',
+        url: 'library/Messier catalog/M110.jpg',
+        sort: 9,
         tags: ['GALAXIES', 'MESSIER']
     },
     {
         title: 'Markarian Chain',
         meta: 'M84 / M86 / M87 | Virgo Cluster | Messier target',
         url: 'library/MarkarianChain.jpg',
-        sort: 8,
-        tags: ['GALAXIES', 'MESSIER']
+        sort: 10,
+        tags: ['GALAXIES']
     },
     {
         title: 'Leo Triplet',
         meta: 'M65 / M66 / NGC 3628 | Leo Triplet',
         url: 'library/Leo Triplet.jpg',
-        sort: 9,
+        sort: 11,
         tags: ['GALAXIES']
     },
     {
