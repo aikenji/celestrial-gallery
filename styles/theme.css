@@ -225,6 +225,501 @@ nav.nav-exiting .nav-item {
     }
 }
 
+.messier-chart-panel {
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 var(--spacing) 28px;
+}
+
+.messier-chart-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 24px;
+    padding: 22px 22px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.messier-chart-header {
+    display: block;
+    margin: 0;
+}
+
+.messier-chart-kicker {
+    font-size: 0.9rem;
+    letter-spacing: 0.18rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.messier-chart-title {
+    display: none;
+}
+
+.messier-chart-stats {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    white-space: nowrap;
+}
+
+.messier-stat-value,
+.messier-stat-total {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.22rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text-main);
+}
+
+.messier-stat-divider {
+    color: var(--text-dim);
+}
+
+.messier-stat-label {
+    font-size: 0.82rem;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-left: 4px;
+}
+
+.messier-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-self: end;
+    align-self: center;
+    justify-content: flex-end;
+    gap: 10px 18px;
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12rem;
+}
+
+.messier-legend-group {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px 12px;
+}
+
+.messier-legend-group-label {
+    color: rgba(197, 160, 89, 0.78);
+    font-size: 0.68rem;
+    letter-spacing: 0.14rem;
+}
+
+.messier-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-shadow:
+        0 0 8px currentColor,
+        0 0 2px rgba(0, 0, 0, 0.9);
+}
+
+.messier-legend-item.is-captured {
+    color: var(--text-dim);
+}
+
+.messier-legend-item.is-missing {
+    color: var(--text-dim);
+}
+
+.messier-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.messier-legend-shape {
+    width: 9px;
+    height: 9px;
+    display: inline-block;
+    background: #89d690;
+    box-shadow:
+        0 0 10px rgba(67, 209, 127, 0.42),
+        0 0 2px rgba(0, 0, 0, 0.85);
+}
+
+.messier-legend-shape.is-nebula {
+    border-radius: 1px;
+}
+
+.messier-legend-shape.is-cluster {
+    border-radius: 50%;
+}
+
+.messier-legend-shape.is-galaxy {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 9px solid #89d690;
+    box-shadow: none;
+    filter:
+        drop-shadow(0 0 10px rgba(67, 209, 127, 0.42))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.85));
+}
+
+.messier-legend-dot.is-captured {
+    background: #43d17f;
+    box-shadow:
+        0 0 10px rgba(67, 209, 127, 0.48),
+        0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.messier-legend-dot.is-missing {
+    background: #e65757;
+    box-shadow:
+        0 0 10px rgba(230, 87, 87, 0.46),
+        0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.messier-chart-frame {
+    grid-column: 1 / -1;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.messier-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.messier-chart-backdrop {
+    fill: rgba(5, 5, 6, 0.96);
+}
+
+.messier-chart-plot {
+    fill: rgba(7, 7, 9, 0.92);
+}
+
+.messier-grid-line {
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 1;
+}
+
+.messier-chart-frame-outline {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+}
+
+.messier-axis-label {
+    fill: rgba(224, 224, 224, 0.5);
+    font-size: 12px;
+    letter-spacing: 0.02rem;
+}
+
+.messier-axis-title {
+    fill: rgba(224, 224, 224, 0.62);
+    font-size: 12px;
+    letter-spacing: 0.06rem;
+    text-transform: uppercase;
+}
+
+.messier-axis-label-ra {
+    text-anchor: middle;
+}
+
+.messier-axis-label-dec {
+    text-anchor: start;
+}
+
+.messier-point.is-captured {
+    fill: #43d17f;
+    stroke: rgba(0, 0, 0, 0.65);
+    stroke-width: 1.05;
+    cursor: default;
+    filter:
+        drop-shadow(0 0 7px rgba(67, 209, 127, 0.45))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.85));
+}
+
+.messier-point.is-missing {
+    fill: #e65757;
+    stroke: rgba(0, 0, 0, 0.65);
+    stroke-width: 1.05;
+    opacity: 0.92;
+    filter:
+        drop-shadow(0 0 7px rgba(230, 87, 87, 0.42))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.85));
+}
+
+.messier-point-label {
+    fill: #89d690;
+    font-size: 6.0px;
+    letter-spacing: 0.01rem;
+    cursor: pointer;
+    stroke: rgba(0, 0, 0, 0.95);
+    stroke-width: 1.7px;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 0 7px rgba(67, 209, 127, 0.38));
+    dominant-baseline: middle;
+}
+
+.messier-point-label:hover,
+.messier-point-label:focus {
+    filter:
+        drop-shadow(0 0 10px rgba(67, 209, 127, 0.52))
+        drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+    outline: none;
+}
+
+.messier-lst-line {
+    stroke: var(--accent);
+    stroke-width: 0.8;
+    stroke-dasharray: 8 4;
+    opacity: 0.4;
+}
+
+.messier-lst-label {
+    fill: var(--accent);
+    font-size: 10px;
+    letter-spacing: 0.15rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.messier-midnight-line {
+    stroke: #8ecae6;
+    stroke-width: 0.8;
+    stroke-dasharray: 8 4;
+    opacity: 0.5;
+}
+
+.messier-midnight-label {
+    fill: #8ecae6;
+    font-size: 10px;
+    letter-spacing: 0.15rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.messier-location-text {
+    fill: var(--text-dim);
+    font-size: 9px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.08rem;
+    text-transform: uppercase;
+}
+
+.astro-object text {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.1rem;
+    fill: var(--text-dim);
+    text-transform: uppercase;
+}
+
+.astro-object.sun circle {
+    fill: rgba(212, 175, 55, 0.15);
+    stroke: #d4af37;
+    stroke-width: 0.8;
+}
+
+.astro-object.moon circle {
+    fill: rgba(160, 160, 160, 0.15);
+    stroke: #a0a0a0;
+    stroke-width: 0.8;
+}
+
+.messier-location-legend-bg {
+    fill: rgba(0, 0, 0, 0.3);
+    stroke: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+}
+
+.messier-chart-footer {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+}
+
+.messier-chart-toggles {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-start;
+}
+
+.messier-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    transition: color 0.3s ease;
+}
+
+.messier-toggle-btn:hover {
+    color: var(--text-main);
+}
+
+.messier-toggle-btn.is-active {
+    color: var(--accent);
+}
+
+.toggle-icon {
+    width: 8px;
+    height: 8px;
+    border: 1px solid currentColor;
+    border-radius: 1px;
+    display: inline-block;
+    transition: background 0.3s ease;
+}
+
+.is-active .toggle-icon {
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.messier-ecliptic-line {
+    fill: none;
+    stroke: rgba(184, 134, 11, 0.45);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+
+.messier-constellation-line {
+    fill: none;
+    stroke: rgba(192, 192, 192, 0.22);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+
+.messier-constellation-star {
+    fill: #c0c0c0;
+    filter: drop-shadow(0 0 3px rgba(192, 192, 192, 0.6));
+    pointer-events: none;
+}
+
+.messier-constellation-name {
+    fill: rgba(192, 192, 192, 0.5);
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.messier-ecliptic-marker {
+    fill: rgba(184, 134, 11, 0.45);
+    font-size: 8px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.05rem;
+    pointer-events: none;
+}
+
+.messier-ecliptic-equinox {
+    fill: rgba(184, 134, 11, 0.8);
+    font-size: 11px;
+    font-family: 'serif';
+    pointer-events: none;
+}
+
+.messier-ecliptic-dot {
+    fill: rgba(184, 134, 11, 0.6);
+    pointer-events: none;
+}
+
+.photo-card-focus {
+    animation: messierCardPulse 1.25s ease;
+    border-color: rgba(197, 160, 89, 0.65);
+    box-shadow: 0 0 0 1px rgba(197, 160, 89, 0.38), 0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+@keyframes messierCardPulse {
+    0% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.045);
+    }
+    70% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.messier-hover-card {
+    position: absolute;
+    width: 196px;
+    background: rgba(5, 5, 6, 0.94);
+    border: 1px solid rgba(197, 160, 89, 0.22);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.32);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+    overflow: hidden;
+    z-index: 2;
+}
+
+.messier-hover-card.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.messier-hover-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    filter: brightness(0.94);
+}
+
+.messier-hover-copy {
+    padding: 10px 12px 12px;
+    background: linear-gradient(to bottom, rgba(12, 12, 14, 0.88), rgba(5, 5, 6, 0.96));
+}
+
+.messier-hover-id {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.messier-hover-meta {
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+}
+
 #lightbox {
     position: fixed;
     top: 0;
@@ -259,4 +754,63 @@ footer {
     color: var(--text-dim);
     letter-spacing: 0.1rem;
     position: relative;
+}
+
+@media (max-width: 768px) {
+    .messier-chart-panel {
+        padding: 0 1rem 22px;
+    }
+
+    .messier-chart-shell {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 18px;
+    }
+
+    .messier-chart-header {
+        display: block;
+    }
+
+    .messier-chart-kicker {
+        font-size: 0.72rem;
+    }
+
+    .messier-chart-stats {
+        gap: 4px;
+    }
+
+    .messier-stat-value,
+    .messier-stat-total {
+        font-size: 1rem;
+    }
+
+    .messier-chart-legend {
+        justify-self: start;
+        gap: 8px;
+        font-size: 0.68rem;
+        letter-spacing: 0.08rem;
+    }
+
+    .messier-axis-label,
+    .messier-axis-title,
+    .messier-point-label {
+        font-size: 10px;
+    }
+
+    .messier-hover-card {
+        width: 152px;
+    }
+
+    .messier-hover-copy {
+        padding: 8px 10px 10px;
+    }
+
+    .messier-hover-id {
+        font-size: 0.88rem;
+    }
+
+    .messier-hover-meta {
+        font-size: 0.58rem;
+        letter-spacing: 0.06rem;
+    }
 }

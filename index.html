@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/gallery.css">
     <script src="data/gallery-data.js" defer></script>
+    <script src="data/messier-catalog.js" defer></script>
     <script src="scripts/gallery.js" defer></script>
 </head>
 <body>
@@ -21,6 +22,61 @@
         </h1>
         <nav id="nav-group"></nav>
     </header>
+
+    <section class="messier-chart-panel" id="messier-chart-panel" hidden>
+        <div class="messier-chart-shell">
+            <div class="messier-chart-header">
+                <div class="messier-chart-copy">
+                    <div class="messier-chart-kicker">Messier Sky Chart</div>
+                    <div class="messier-chart-title">All 110 Messier Targets</div>
+                </div>
+                <div class="messier-chart-stats">
+                    <span class="messier-stat-value" id="messier-captured-count">0</span>
+                    <span class="messier-stat-divider">/</span>
+                    <span class="messier-stat-total" id="messier-total-count">110</span>
+                    <span class="messier-stat-label">captured</span>
+                </div>
+            </div>
+            <div class="messier-chart-legend" aria-hidden="true">
+                <div class="messier-legend-group">
+                    <span class="messier-legend-item">
+                        <span class="messier-legend-shape is-nebula"></span>
+                        Nebula
+                    </span>
+                    <span class="messier-legend-item">
+                        <span class="messier-legend-shape is-cluster"></span>
+                        Cluster
+                    </span>
+                    <span class="messier-legend-item">
+                        <span class="messier-legend-shape is-galaxy"></span>
+                        Galaxy
+                    </span>
+                </div>
+            </div>
+            <div class="messier-chart-frame">
+                <svg id="messier-chart" class="messier-chart" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Messier sky chart"></svg>
+                <div class="messier-hover-card" id="messier-hover-card" hidden>
+                    <img class="messier-hover-image" id="messier-hover-image" alt="">
+                    <div class="messier-hover-copy">
+                        <div class="messier-hover-id" id="messier-hover-id"></div>
+                        <div class="messier-hover-meta" id="messier-hover-meta"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="messier-chart-footer">
+                <div class="messier-chart-toggles">
+                    <button class="messier-toggle-btn" id="toggle-ecliptic" type="button">
+                        <span class="toggle-icon"></span>
+                        Ecliptic
+                    </button>
+                    <button class="messier-toggle-btn" id="toggle-constellations" type="button">
+                        <span class="toggle-icon"></span>
+                        Constellations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <main class="gallery" id="gallery"></main>
 
