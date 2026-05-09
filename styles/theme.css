@@ -413,6 +413,10 @@ nav.nav-exiting .nav-item {
     fill: rgba(7, 7, 9, 0.92);
 }
 
+.messier-altitude-plot {
+    fill: rgba(8, 8, 10, 0.9);
+}
+
 .messier-grid-line {
     stroke: rgba(255, 255, 255, 0.05);
     stroke-width: 1;
@@ -422,6 +426,82 @@ nav.nav-exiting .nav-item {
     fill: none;
     stroke: rgba(255, 255, 255, 0.08);
     stroke-width: 1;
+}
+
+.messier-altitude-curve {
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.messier-altitude-curve.is-sun {
+    stroke: rgba(212, 175, 55, 0.8);
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.16));
+}
+
+.messier-altitude-curve.is-moon {
+    stroke: rgba(142, 202, 230, 0.74);
+    filter: drop-shadow(0 0 4px rgba(142, 202, 230, 0.12));
+}
+
+.messier-altitude-zero-line {
+    stroke: rgba(255, 255, 255, 0.18);
+    stroke-width: 1;
+    stroke-dasharray: 5 4;
+}
+
+.messier-altitude-now-line {
+    stroke: rgba(255, 255, 255, 0.24);
+    stroke-width: 1;
+    stroke-dasharray: 3 5;
+}
+
+.messier-altitude-dot {
+    stroke-width: 1;
+}
+
+.messier-altitude-dot.is-sun {
+    fill: rgba(212, 175, 55, 0.92);
+    stroke: rgba(7, 7, 9, 0.8);
+}
+
+.messier-altitude-dot.is-moon {
+    fill: rgba(142, 202, 230, 0.92);
+    stroke: rgba(7, 7, 9, 0.8);
+}
+
+.messier-altitude-event-dot {
+    stroke: rgba(7, 7, 9, 0.82);
+    stroke-width: 1;
+}
+
+.messier-altitude-event.is-sun .messier-altitude-event-dot {
+    fill: rgba(212, 175, 55, 0.95);
+}
+
+.messier-altitude-event.is-moon .messier-altitude-event-dot {
+    fill: rgba(142, 202, 230, 0.95);
+}
+
+.messier-altitude-event-text {
+    fill: rgba(224, 224, 224, 0.68);
+    font-size: 8px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.06rem;
+    text-transform: uppercase;
+    paint-order: stroke fill;
+    stroke: rgba(7, 7, 9, 0.92);
+    stroke-width: 2px;
+}
+
+.messier-altitude-event.is-sun .messier-altitude-event-text {
+    fill: rgba(212, 175, 55, 0.82);
+}
+
+.messier-altitude-event.is-moon .messier-altitude-event-text {
+    fill: rgba(142, 202, 230, 0.8);
 }
 
 .messier-axis-label {
