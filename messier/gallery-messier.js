@@ -7,6 +7,7 @@
     const constellationData = ns.messierConstellations.data;
 
     let showEcliptic = false;
+    let showPlanets = false;
     let showConstellations = false;
     let pendingMessierFocusId = null;
     let messierHoverTimer = null;
@@ -728,6 +729,30 @@
         moonGroup.appendChild(moonText);
         elements.messierChart.appendChild(moonGroup);
 
+        if (showPlanets) {
+            const planetSymbols = {
+                Mercury: '☿',
+                Venus: '♀',
+                Mars: '♂',
+                Jupiter: '♃',
+                Saturn: '♄',
+                Uranus: '♅',
+                Neptune: '♆'
+            };
+            Object.entries(astroDetails.planets).forEach(([name, pos]) => {
+                const px = getChartX(pos.ra);
+                const py = getChartY(pos.dec);
+                if (px < skyPlot.left || px > skyPlot.left + skyInnerWidth) return;
+                
+                const planetGroup = createSvgNode('g', { class: `astro-object planet is-${name.toLowerCase()}` });
+                planetGroup.appendChild(createSvgNode('circle', { cx: px, cy: py, r: 2.0 }));
+                const planetText = createSvgNode('text', { x: px, y: py + 13, 'text-anchor': 'middle' });
+                planetText.textContent = planetSymbols[name] || '';
+                planetGroup.appendChild(planetText);
+                elements.messierChart.appendChild(planetGroup);
+            });
+        }
+
         const legendX = width - skyPlot.right - 260;
         const legendY = skyPlot.top + skyInnerHeight - 78;
         const locationLegend = createSvgNode('g', { transform: `translate(${legendX}, ${legendY})` });
@@ -787,6 +812,15 @@
                 showEcliptic = !showEcliptic;
                 elements.toggleEclipticBtn.classList.toggle('is-active', showEcliptic);
                 logger.info('Toggled ecliptic overlay', { showEcliptic });
+                renderMessierChart();
+            });
+        }
+
+        if (elements.togglePlanetsBtn) {
+            elements.togglePlanetsBtn.addEventListener('click', () => {
+                showPlanets = !showPlanets;
+                elements.togglePlanetsBtn.classList.toggle('is-active', showPlanets);
+                logger.info('Toggled planets overlay', { showPlanets });
                 renderMessierChart();
             });
         }

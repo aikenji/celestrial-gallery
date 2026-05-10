@@ -46,6 +46,7 @@
         messierHoverId: document.getElementById('messier-hover-id'),
         messierHoverMeta: document.getElementById('messier-hover-meta'),
         toggleEclipticBtn: document.getElementById('toggle-ecliptic'),
+        togglePlanetsBtn: document.getElementById('toggle-planets'),
         toggleConstellationsBtn: document.getElementById('toggle-constellations')
     };
 

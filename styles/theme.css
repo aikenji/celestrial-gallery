@@ -689,6 +689,35 @@ nav.nav-exiting .nav-item {
     stroke-width: 0.8;
 }
 
+.astro-object.planet circle {
+    stroke-width: 2.5px;
+    stroke-opacity: 0.3;
+}
+
+.astro-object.planet text {
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: normal;
+    fill-opacity: 0.9;
+    stroke: rgba(128, 128, 128, 0.4);
+    stroke-width: 1.2px;
+    paint-order: stroke fill;
+}
+
+
+/* Planet Colors & Glows */
+.is-mercury circle, .is-mercury text { fill: #9aa0a6; stroke: #9aa0a6; }
+.is-venus circle, .is-venus text { fill: #f4d03f; stroke: #f4d03f; }
+.is-mars circle, .is-mars text { fill: #e27d60; stroke: #e27d60; }
+.is-jupiter circle, .is-jupiter text { fill: #e8a87c; stroke: #e8a87c; }
+.is-saturn circle, .is-saturn text { fill: #a67b5b; stroke: #a67b5b; }
+.is-uranus circle, .is-uranus text { fill: #87ceeb; stroke: #87ceeb; }
+.is-neptune circle, .is-neptune text { fill: #1e90ff; stroke: #1e90ff; }
+
+.astro-object.planet circle {
+    filter: drop-shadow(0 0 2px currentColor);
+}
+
 .messier-location-legend-bg {
     fill: rgba(0, 0, 0, 0.3);
     stroke: rgba(255, 255, 255, 0.05);
@@ -745,7 +774,7 @@ nav.nav-exiting .nav-item {
 
 .messier-ecliptic-line {
     fill: none;
-    stroke: rgba(184, 134, 11, 0.45);
+    stroke: rgba(184, 134, 11, 0.3);
     stroke-width: 1.2;
     stroke-linecap: round;
     pointer-events: none;

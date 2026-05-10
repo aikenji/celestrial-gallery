@@ -83,6 +83,41 @@
         const moonPhaseAngle = (moonLong - sunLong + 360) % 360;
         const moonIllumination = (1 - Math.cos(moonPhaseAngle * Math.PI / 180)) / 2;
 
+        const sunR = 1.00014 - 0.01671 * Math.cos(solarAnomaly * Math.PI / 180) - 0.00014 * Math.cos(2 * solarAnomaly * Math.PI / 180);
+        const sunX = sunR * Math.cos(sunLong * Math.PI / 180);
+        const sunY = sunR * Math.sin(sunLong * Math.PI / 180);
+
+        const planets = {};
+        const planetData = {
+            Mercury: { N: 48.3313, i: 7.0047, w: 29.1241, a: 0.387098, e: 0.205635, M0: 168.6562, M1: 4.0923344368 },
+            Venus: { N: 76.6799, i: 3.3946, w: 54.8910, a: 0.723330, e: 0.006773, M0: 48.0052, M1: 1.6021302244 },
+            Mars: { N: 49.5574, i: 1.8497, w: 286.5016, a: 1.523688, e: 0.093405, M0: 18.6021, M1: 0.5240207766 },
+            Jupiter: { N: 100.4542, i: 1.3030, w: 273.8777, a: 5.20256, e: 0.048498, M0: 19.8950, M1: 0.0830853001 },
+            Saturn: { N: 113.6634, i: 2.4886, w: 339.3939, a: 9.55475, e: 0.055546, M0: 316.9670, M1: 0.0334442282 },
+            Uranus: { N: 74.0005, i: 0.7733, w: 96.6612, a: 19.18171, e: 0.047318, M0: 142.5905, M1: 0.011725806 },
+            Neptune: { N: 131.7806, i: 1.7700, w: 272.8461, a: 30.05826, e: 0.008606, M0: 260.2471, M1: 0.005995147 }
+        };
+
+        for (const [name, p] of Object.entries(planetData)) {
+            const M = (p.M0 + p.M1 * d) % 360;
+            const E = M + (180 / Math.PI) * p.e * Math.sin(M * Math.PI / 180) * (1 + p.e * Math.cos(M * Math.PI / 180));
+            const xv = p.a * (Math.cos(E * Math.PI / 180) - p.e);
+            const yv = p.a * (Math.sqrt(1 - p.e * p.e) * Math.sin(E * Math.PI / 180));
+            const v = Math.atan2(yv, xv) * 180 / Math.PI;
+            const r = Math.sqrt(xv * xv + yv * yv);
+            const xh = r * (Math.cos(p.N * Math.PI / 180) * Math.cos((v + p.w) * Math.PI / 180) - Math.sin(p.N * Math.PI / 180) * Math.sin((v + p.w) * Math.PI / 180) * Math.cos(p.i * Math.PI / 180));
+            const yh = r * (Math.sin(p.N * Math.PI / 180) * Math.cos((v + p.w) * Math.PI / 180) + Math.cos(p.N * Math.PI / 180) * Math.sin((v + p.w) * Math.PI / 180) * Math.cos(p.i * Math.PI / 180));
+            const zh = r * (Math.sin((v + p.w) * Math.PI / 180) * Math.sin(p.i * Math.PI / 180));
+            const xg = xh + sunX;
+            const yg = yh + sunY;
+            const zg = zh;
+            const ecl = Math.atan2(yg, xg) * 180 / Math.PI;
+            const ecb = Math.atan2(zg, Math.sqrt(xg * xg + yg * yg)) * 180 / Math.PI;
+            const ra = (Math.atan2(Math.sin(ecl * Math.PI / 180) * Math.cos(epsilon * Math.PI / 180) - Math.tan(ecb * Math.PI / 180) * Math.sin(epsilon * Math.PI / 180), Math.cos(ecl * Math.PI / 180)) * 180 / Math.PI + 360) % 360;
+            const dec = Math.asin(Math.sin(ecb * Math.PI / 180) * Math.cos(epsilon * Math.PI / 180) + Math.cos(ecb * Math.PI / 180) * Math.sin(epsilon * Math.PI / 180) * Math.sin(ecl * Math.PI / 180)) * 180 / Math.PI;
+            planets[name] = { ra, dec };
+        }
+
         return {
             now,
             lst,
@@ -94,7 +129,8 @@
                 illumination: moonIllumination,
                 phaseAngle: moonPhaseAngle,
                 phaseLabel: getMoonPhaseLabel(moonPhaseAngle)
-            }
+            },
+            planets
         };
     }
 
