@@ -8,6 +8,14 @@
 
     let showEcliptic = false;
     let showPlanets = false;
+    let showPolar = false;
+    let viewRa = 0;
+    let viewDec = 0;
+    let isDragging = false;
+    let isAutoRotating = false;
+    let rotationTimer = null;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
     let showConstellations = false;
     let pendingMessierFocusId = null;
     let messierHoverTimer = null;
@@ -206,6 +214,31 @@
         return phaseEmojis[phaseLabel] || '🌕';
     }
 
+    function startAutoRotation() {
+        if (rotationTimer) return;
+        isAutoRotating = true;
+        rotationTimer = window.requestAnimationFrame(function animate() {
+            if (!isAutoRotating) return;
+            viewRa = (viewRa + 0.3 + 360) % 360;
+            renderMessierChart();
+            rotationTimer = window.requestAnimationFrame(animate);
+        });
+        if (elements.togglePlayBtn) {
+            elements.togglePlayBtn.classList.add('is-active');
+        }
+    }
+
+    function stopAutoRotation() {
+        isAutoRotating = false;
+        if (rotationTimer) {
+            window.cancelAnimationFrame(rotationTimer);
+            rotationTimer = null;
+        }
+        if (elements.togglePlayBtn) {
+            elements.togglePlayBtn.classList.remove('is-active');
+        }
+    }
+
     function renderMessierChart() {
         const catalog = messierData.getMessierSkyData();
         const capturedIds = messierData.getCapturedMessierIds();
@@ -226,19 +259,39 @@
         const altitudeInnerWidth = altitudeWidth - altitudePlot.left - altitudePlot.right;
         const altitudeInnerHeight = altitudeHeight - altitudePlot.top - altitudePlot.bottom;
 
-        logger.info('Rendering messier chart', {
-            showEcliptic,
-            showConstellations,
-            captured: capturedIds.size,
-            altitudeSamples: altitudeSeries.points.length
-        });
+        const cx = skyPlot.left + skyInnerWidth / 2;
+        const cy = skyPlot.top + skyInnerHeight / 2;
+        const rMax = Math.min(skyInnerWidth, skyInnerHeight) * 0.45;
 
-        function getChartX(raDegrees) {
+        function project3D(ra, dec) {
+            const raRad = (ra - viewRa) * Math.PI / 180;
+            const decRad = dec * Math.PI / 180;
+            const rotDecRad = viewDec * Math.PI / 180;
+
+            const x = Math.cos(decRad) * Math.sin(raRad);
+            const y = Math.sin(decRad) * Math.cos(rotDecRad) - Math.cos(decRad) * Math.sin(rotDecRad) * Math.cos(raRad);
+            const z = Math.sin(decRad) * Math.sin(rotDecRad) + Math.cos(decRad) * Math.cos(rotDecRad) * Math.cos(raRad);
+
+            return {
+                x: cx + x * rMax,
+                y: cy - y * rMax,
+                z: z,
+                visible: z > 0
+            };
+        }
+
+        function getChartX(raDegrees, decDegrees = 0) {
+            if (showPolar) {
+                return project3D(raDegrees, decDegrees).x;
+            }
             const wrapped = ((360 - raDegrees) % 360 + 360) % 360;
             return skyPlot.left + wrapped / 360 * skyInnerWidth;
         }
 
-        function getChartY(decDegrees) {
+        function getChartY(decDegrees, raDegrees = 0) {
+            if (showPolar) {
+                return project3D(raDegrees, decDegrees).y;
+            }
             return skyPlot.top + (90 - decDegrees) / 180 * skyInnerHeight;
         }
 
@@ -415,7 +468,11 @@
         defs.appendChild(moonGlow);
 
         const plotClip = createSvgNode('clipPath', { id: 'plotClip' });
-        plotClip.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight }));
+        if (showPolar) {
+            plotClip.appendChild(createSvgNode('circle', { cx, cy, r: rMax }));
+        } else {
+            plotClip.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight }));
+        }
         defs.appendChild(plotClip);
         elements.messierChart.appendChild(defs);
 
@@ -430,18 +487,26 @@
         elements.messierAltitudeChart.appendChild(altitudeDefs);
 
         elements.messierChart.appendChild(createSvgNode('rect', { x: 0, y: 0, width, height, class: 'messier-chart-backdrop' }));
-        elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-plot' }));
-        elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
+        if (showPolar) {
+            elements.messierChart.appendChild(createSvgNode('circle', { cx, cy, r: rMax, class: 'messier-chart-plot' }));
+            elements.messierChart.appendChild(createSvgNode('circle', { cx, cy, r: rMax, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
+        } else {
+            elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-plot' }));
+            elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
+        }
         elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: 0, y: 0, width: altitudeWidth, height: altitudeHeight, class: 'messier-chart-backdrop' }));
         elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-altitude-plot' }));
         elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, filter: 'url(#altitudeNoise)', style: 'pointer-events: none;' }));
 
         const drawRaBand = (centerRa, halfWidth, fill) => {
+            if (showPolar) return;
+
             const r1 = (centerRa - halfWidth + 360) % 360;
             const r2 = (centerRa + halfWidth + 360) % 360;
+            const bandGroup = createSvgNode('g', { 'clip-path': 'url(#plotClip)', filter: 'url(#softBlur)' });
+
             const x1 = getChartX(r1);
             const x2 = getChartX(r2);
-            const bandGroup = createSvgNode('g', { 'clip-path': 'url(#plotClip)', filter: 'url(#softBlur)' });
             if (x1 > x2) {
                 bandGroup.appendChild(createSvgNode('rect', { x: x2, y: skyPlot.top - 20, width: x1 - x2, height: skyInnerHeight + 40, fill }));
             } else {
@@ -456,15 +521,80 @@
         drawRaBand(astroDetails.sun.ra, astro.getHourAngleForAltitude(CFG_LOC, astroDetails.sun.dec, -6), 'rgba(50, 110, 220, 0.12)');
         drawRaBand(astroDetails.sun.ra, astro.getHourAngleForAltitude(CFG_LOC, astroDetails.sun.dec, -0.83), 'rgba(255, 200, 80, 0.1)');
 
-        for (let raHour = 3; raHour < 24; raHour += 3) {
-            const x = getChartX(raHour * 15);
-            elements.messierChart.appendChild(createSvgNode('line', { x1: x, y1: skyPlot.top, x2: x, y2: skyPlot.top + skyInnerHeight, class: 'messier-grid-line' }));
-        }
+        if (showPolar) {
+            // Meridians (RA lines)
+            for (let raHour = 0; raHour < 24; raHour += 3) {
+                const ra = raHour * 15;
+                let d = '';
+                let lastVisible = false;
+                for (let dec = -90; dec <= 90; dec += 5) {
+                    const proj = project3D(ra, dec);
+                    if (proj.visible) {
+                        d += (d === '' || !lastVisible ? 'M' : ' L') + ` ${proj.x} ${proj.y}`;
+                    }
+                    lastVisible = proj.visible;
+                }
+                if (d) {
+                    elements.messierChart.appendChild(createSvgNode('path', { d, class: 'messier-grid-line', fill: 'none' }));
+                }
 
-        [-60, -30, 0, 30, 60].forEach(dec => {
-            const y = getChartY(dec);
-            elements.messierChart.appendChild(createSvgNode('line', { x1: skyPlot.left, y1: y, x2: skyPlot.left + skyInnerWidth, y2: y, class: 'messier-grid-line' }));
-        });
+                // RA Labels
+                const labelProj = project3D(ra, 0);
+                if (labelProj.visible) {
+                    const labelX = cx + (labelProj.x - cx) * 1.15;
+                    const labelY = cy + (labelProj.y - cy) * 1.15;
+                    const label = createSvgNode('text', { x: labelX, y: labelY, class: 'messier-axis-label messier-axis-label-ra', 'text-anchor': 'middle' });
+                    label.textContent = `${raHour}h`;
+                    elements.messierChart.appendChild(label);
+                }
+            }
+
+            // Parallels (Dec lines)
+            [-60, -30, 0, 30, 60].forEach(dec => {
+                let d = '';
+                let lastVisible = false;
+                for (let ra = 0; ra <= 360; ra += 5) {
+                    const proj = project3D(ra, dec);
+                    if (proj.visible) {
+                        d += (d === '' || !lastVisible ? 'M' : ' L') + ` ${proj.x} ${proj.y}`;
+                    }
+                    lastVisible = proj.visible;
+                }
+                if (d) {
+                    elements.messierChart.appendChild(createSvgNode('path', { d, class: 'messier-grid-line', fill: 'none' }));
+                }
+                
+                // Dec Labels
+                const labelProj = project3D(viewRa, dec);
+                if (labelProj.visible) {
+                    const decLabel = createSvgNode('text', { x: labelProj.x, y: labelProj.y - 4, class: 'messier-axis-label messier-axis-label-dec', 'text-anchor': 'middle' });
+                    decLabel.textContent = dec > 0 ? `+${dec}°` : `${dec}°`;
+                    elements.messierChart.appendChild(decLabel);
+                }
+            });
+        } else {
+            for (let raHour = 0; raHour < 24; raHour += 3) {
+                const x = getChartX(raHour * 15);
+                elements.messierChart.appendChild(createSvgNode('line', { x1: x, y1: skyPlot.top, x2: x, y2: skyPlot.top + skyInnerHeight, class: 'messier-grid-line' }));
+                const label = createSvgNode('text', { x, y: skyPlot.top + skyInnerHeight + 24, class: 'messier-axis-label messier-axis-label-ra', 'text-anchor': 'middle' });
+                label.textContent = `${raHour}h`;
+                elements.messierChart.appendChild(label);
+            }
+
+            [-60, -30, 0, 30, 60].forEach(dec => {
+                const y = getChartY(dec);
+                elements.messierChart.appendChild(createSvgNode('line', { x1: skyPlot.left, y1: y, x2: skyPlot.left + skyInnerWidth, y2: y, class: 'messier-grid-line' }));
+                
+                const decLabel = createSvgNode('text', { x: 24, y: y + 5, class: 'messier-axis-label messier-axis-label-dec' });
+                decLabel.textContent = dec > 0 ? `+${dec}°` : `${dec}°`;
+                elements.messierChart.appendChild(decLabel);
+
+                const alt = 90 - Math.abs(CFG_LOC.lat - dec);
+                const altLabel = createSvgNode('text', { x: width - skyPlot.right + 10, y: y + 5, class: 'messier-axis-label messier-axis-label-alt', 'text-anchor': 'start' });
+                altLabel.textContent = `${alt.toFixed(0)}°`;
+                elements.messierChart.appendChild(altLabel);
+            });
+        }
 
         if (showEcliptic) {
             const eclipticPath = createSvgNode('path', { class: 'messier-ecliptic-line', 'clip-path': 'url(#plotClip)' });
@@ -476,7 +606,8 @@
                 { label: 'Oct', lambda: 190 }, { label: 'Nov', lambda: 220 }, { label: 'Dec', lambda: 250 }
             ];
             let d = '';
-            let prevX = null;
+            let lastVisible = false;
+            let lastX = null;
 
             for (let lambda = 0; lambda <= 360; lambda += 1) {
                 const lRad = lambda * Math.PI / 180;
@@ -484,26 +615,28 @@
                 const decRad = Math.asin(Math.sin(epsilon) * Math.sin(lRad));
                 const ra = (raRad * 180 / Math.PI + 360) % 360;
                 const dec = decRad * 180 / Math.PI;
-                const x = getChartX(ra);
-                const y = getChartY(dec);
+                
+                const proj = getProj(ra, dec);
+                const x = proj.x;
+                const y = proj.y;
+                const visible = proj.visible;
 
-                if (lambda === 0 || prevX === null) {
-                    d += `M ${x} ${y}`;
-                } else if (Math.abs(x - prevX) > skyInnerWidth * 0.5) {
-                    d += ` M ${x} ${y}`;
-                } else {
-                    d += ` L ${x} ${y}`;
+                if (visible) {
+                    const wrap = !showPolar && lastX !== null && Math.abs(x - lastX) > skyInnerWidth * 0.5;
+                    d += (d === '' || !lastVisible || wrap ? 'M' : ' L') + ` ${x} ${y}`;
                 }
-                prevX = x;
+                
+                lastVisible = visible;
+                lastX = x;
 
-                if (lambda === 0 || lambda === 180) {
+                if (visible && (lambda === 0 || lambda === 180)) {
                     const equinoxLabel = createSvgNode('text', { x, y: y + 16, class: 'messier-ecliptic-equinox', 'text-anchor': 'middle', 'clip-path': 'url(#plotClip)' });
                     equinoxLabel.textContent = lambda === 0 ? '♈' : '♎';
                     elements.messierChart.appendChild(equinoxLabel);
                 }
 
                 const month = monthStarts.find(item => item.lambda === lambda);
-                if (month) {
+                if (month && visible) {
                     elements.messierChart.appendChild(createSvgNode('circle', { cx: x, cy: y, r: 1.5, class: 'messier-ecliptic-dot', 'clip-path': 'url(#plotClip)' }));
                     const text = createSvgNode('text', { x, y: y - 10, class: 'messier-ecliptic-marker', 'text-anchor': 'middle', 'clip-path': 'url(#plotClip)' });
                     text.textContent = month.label;
@@ -517,36 +650,36 @@
         if (showConstellations) {
             Object.entries(constellationData).forEach(([name, lines]) => {
                 let namePlaced = false;
-                const starsAdded = new Set();
 
                 lines.forEach(line => {
                     const polyline = createSvgNode('path', { class: 'messier-constellation-line', 'clip-path': 'url(#plotClip)' });
                     let d = '';
+                    let lastVisible = false;
+                    let lastRa = null;
 
                     line.forEach(([ra, dec], index) => {
                         const ra360 = (ra + 360) % 360;
-                        const x = getChartX(ra360);
-                        const y = getChartY(dec);
-                        const starKey = `${ra.toFixed(2)},${dec.toFixed(2)}`;
+                        const proj = getProj(ra360, dec);
+                        const visible = proj.visible;
+                        const x = proj.x;
+                        const y = proj.y;
 
-                        if (!starsAdded.has(starKey)) {
+                        if (visible) {
                             elements.messierChart.appendChild(createSvgNode('circle', { cx: x, cy: y, r: 1.2, class: 'messier-constellation-star', 'clip-path': 'url(#plotClip)' }));
-                            starsAdded.add(starKey);
+                            
+                            const wrap = !showPolar && lastRa !== null && Math.abs(ra360 - lastRa) > 180;
+                            d += (d === '' || !lastVisible || wrap ? 'M' : ' L') + ` ${x} ${y}`;
+
+                            if (!namePlaced && index === Math.floor(line.length / 2)) {
+                                const nameLabel = createSvgNode('text', { x: x, y: y - 10, class: 'messier-constellation-name', 'text-anchor': 'middle', 'clip-path': 'url(#plotClip)' });
+                                nameLabel.textContent = name;
+                                elements.messierChart.appendChild(nameLabel);
+                                namePlaced = true;
+                            }
                         }
 
-                        if (index === 0) {
-                            d += `M ${x} ${y}`;
-                        } else {
-                            const prevRa = (line[index - 1][0] + 360) % 360;
-                            d += Math.abs(ra360 - prevRa) > 180 ? ` M ${x} ${y}` : ` L ${x} ${y}`;
-                        }
-
-                        if (!namePlaced && index === Math.floor(line.length / 2)) {
-                            const nameLabel = createSvgNode('text', { x, y: y - 10, class: 'messier-constellation-name', 'text-anchor': 'middle', 'clip-path': 'url(#plotClip)' });
-                            nameLabel.textContent = name;
-                            elements.messierChart.appendChild(nameLabel);
-                            namePlaced = true;
-                        }
+                        lastVisible = visible;
+                        lastRa = ra360;
                     });
 
                     polyline.setAttribute('d', d);
@@ -555,44 +688,72 @@
             });
         }
 
-        const lstX = getChartX(astroDetails.lst);
-        elements.messierChart.appendChild(createSvgNode('line', { x1: lstX, y1: skyPlot.top, x2: lstX, y2: skyPlot.top + skyInnerHeight, class: 'messier-lst-line' }));
-        const lstLabel = createSvgNode('text', { x: lstX, y: skyPlot.top - 18, class: 'messier-lst-label', 'text-anchor': 'middle' });
-        lstLabel.textContent = 'Meridian';
-        elements.messierChart.appendChild(lstLabel);
+        if (showPolar) {
+            // Meridian line
+            let dLst = '';
+            let lastVisibleLst = false;
+            for (let dec = -90; dec <= 90; dec += 5) {
+                const proj = project3D(astroDetails.lst, dec);
+                if (proj.visible) {
+                    dLst += (dLst === '' || !lastVisibleLst ? 'M' : ' L') + ` ${proj.x} ${proj.y}`;
+                }
+                lastVisibleLst = proj.visible;
+            }
+            if (dLst) {
+                elements.messierChart.appendChild(createSvgNode('path', { d: dLst, class: 'messier-lst-line', fill: 'none' }));
+                const labelProj = project3D(astroDetails.lst, 45);
+                if (labelProj.visible) {
+                    const lstLabel = createSvgNode('text', { x: labelProj.x, y: labelProj.y - 10, class: 'messier-lst-label', 'text-anchor': 'middle' });
+                    lstLabel.textContent = 'Meridian';
+                    elements.messierChart.appendChild(lstLabel);
+                }
+            }
 
-        const midnightX = getChartX(astroDetails.midnightRa);
-        elements.messierChart.appendChild(createSvgNode('line', { x1: midnightX, y1: skyPlot.top, x2: midnightX, y2: skyPlot.top + skyInnerHeight, class: 'messier-midnight-line' }));
-        const midnightLabel = createSvgNode('text', { x: midnightX, y: skyPlot.top - 18, class: 'messier-midnight-label', 'text-anchor': 'middle' });
-        midnightLabel.textContent = 'Midnight';
-        elements.messierChart.appendChild(midnightLabel);
+            // Midnight line
+            let dMid = '';
+            let lastVisibleMid = false;
+            for (let dec = -90; dec <= 90; dec += 5) {
+                const proj = project3D(astroDetails.midnightRa, dec);
+                if (proj.visible) {
+                    dMid += (dMid === '' || !lastVisibleMid ? 'M' : ' L') + ` ${proj.x} ${proj.y}`;
+                }
+                lastVisibleMid = proj.visible;
+            }
+            if (dMid) {
+                elements.messierChart.appendChild(createSvgNode('path', { d: dMid, class: 'messier-midnight-line', fill: 'none' }));
+                const labelProj = project3D(astroDetails.midnightRa, -45);
+                if (labelProj.visible) {
+                    const midnightLabel = createSvgNode('text', { x: labelProj.x, y: labelProj.y + 15, class: 'messier-midnight-label', 'text-anchor': 'middle' });
+                    midnightLabel.textContent = 'Midnight';
+                    elements.messierChart.appendChild(midnightLabel);
+                }
+            }
+        } else {
+            const lstX = getChartX(astroDetails.lst);
+            elements.messierChart.appendChild(createSvgNode('line', { x1: lstX, y1: skyPlot.top, x2: lstX, y2: skyPlot.top + skyInnerHeight, class: 'messier-lst-line' }));
+            const lstLabel = createSvgNode('text', { x: lstX, y: skyPlot.top - 18, class: 'messier-lst-label', 'text-anchor': 'middle' });
+            lstLabel.textContent = 'Meridian';
+            elements.messierChart.appendChild(lstLabel);
 
-        elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-frame-outline' }));
-        elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-chart-frame-outline' }));
-        const decTitle = createSvgNode('text', { x: 24, y: skyPlot.top - 12, class: 'messier-axis-title' });
-        decTitle.textContent = 'DEC';
-        elements.messierChart.appendChild(decTitle);
-        const altTitle = createSvgNode('text', { x: width - skyPlot.right + 12, y: skyPlot.top - 12, class: 'messier-axis-title' });
-        altTitle.textContent = 'ALT';
-        elements.messierChart.appendChild(altTitle);
-        for (let raHour = 0; raHour < 24; raHour += 3) {
-            const x = getChartX(raHour * 15);
-            const label = createSvgNode('text', { x, y: skyPlot.top + skyInnerHeight + 24, class: 'messier-axis-label messier-axis-label-ra' });
-            label.textContent = `${raHour}h`;
-            elements.messierChart.appendChild(label);
+            const midnightX = getChartX(astroDetails.midnightRa);
+            elements.messierChart.appendChild(createSvgNode('line', { x1: midnightX, y1: skyPlot.top, x2: midnightX, y2: skyPlot.top + skyInnerHeight, class: 'messier-midnight-line' }));
+            const midnightLabel = createSvgNode('text', { x: midnightX, y: skyPlot.top - 18, class: 'messier-midnight-label', 'text-anchor': 'middle' });
+            midnightLabel.textContent = 'Midnight';
+            elements.messierChart.appendChild(midnightLabel);
         }
 
-        [-60, -30, 0, 30, 60].forEach(dec => {
-            const y = getChartY(dec);
-            const decLabel = createSvgNode('text', { x: 24, y: y + 5, class: 'messier-axis-label messier-axis-label-dec' });
-            decLabel.textContent = dec > 0 ? `+${dec}°` : `${dec}°`;
-            elements.messierChart.appendChild(decLabel);
-
-            const alt = 90 - Math.abs(CFG_LOC.lat - dec);
-            const altLabel = createSvgNode('text', { x: width - skyPlot.right + 10, y: y + 5, class: 'messier-axis-label messier-axis-label-alt', 'text-anchor': 'start' });
-            altLabel.textContent = `${alt.toFixed(0)}°`;
-            elements.messierChart.appendChild(altLabel);
-        });
+        if (!showPolar) {
+            elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-frame-outline' }));
+        } else {
+            elements.messierChart.appendChild(createSvgNode('circle', { cx, cy, r: rMax, class: 'messier-chart-frame-outline' }));
+        }
+        
+        const decTitle = createSvgNode('text', { x: 24, y: skyPlot.top - 12, class: 'messier-axis-title' });
+        decTitle.textContent = showPolar ? '' : 'DEC';
+        elements.messierChart.appendChild(decTitle);
+        const altTitle = createSvgNode('text', { x: width - skyPlot.right + 12, y: skyPlot.top - 12, class: 'messier-axis-title' });
+        altTitle.textContent = showPolar ? '' : 'ALT';
+        elements.messierChart.appendChild(altTitle);
 
         [0, 30, 60, 90].forEach(altitude => {
             const y = getAltitudeChartY(altitude);
@@ -700,34 +861,50 @@
             .textContent = `Moon ${currentMoonAlt.toFixed(1)}° | ${getMoonPhaseSymbol(astroDetails.moon.phaseLabel)} ${astroDetails.moon.phaseLabel}`;
         elements.messierAltitudeChart.appendChild(altitudeLegend);
 
-        const sunX = getChartX(astroDetails.sun.ra);
-        const sunY = getChartY(astroDetails.sun.dec);
-        const sunGroup = createSvgNode('g', { class: 'astro-object sun' });
-        sunGroup.appendChild(createSvgNode('circle', { cx: sunX, cy: sunY, r: 6 }));
-        const sunText = createSvgNode('text', { x: sunX, y: sunY + 16, 'text-anchor': 'middle' });
-        sunText.textContent = 'S';
-        sunGroup.appendChild(sunText);
-        elements.messierChart.appendChild(sunGroup);
+        function getProj(ra, dec) {
+            if (showPolar) {
+                return project3D(ra, dec);
+            }
+            const wrapped = ((360 - ra) % 360 + 360) % 360;
+            const x = skyPlot.left + wrapped / 360 * skyInnerWidth;
+            const y = skyPlot.top + (90 - dec) / 180 * skyInnerHeight;
+            return { x, y, visible: true };
+        }
 
-        const moonX = getChartX(astroDetails.moon.ra);
-        const moonY = getChartY(astroDetails.moon.dec);
-        const moonRadius = (astroDetails.moon.illumination * 60 + 20) * (skyInnerWidth / 360);
+        const sunProj = getProj(astroDetails.sun.ra, astroDetails.sun.dec);
+        if (sunProj.visible) {
+            const sunGroup = createSvgNode('g', { class: 'astro-object sun' });
+            sunGroup.appendChild(createSvgNode('circle', { cx: sunProj.x, cy: sunProj.y, r: 6 }));
+            const sunText = createSvgNode('text', { x: sunProj.x, y: sunProj.y + 16, 'text-anchor': 'middle' });
+            sunText.textContent = 'S';
+            sunGroup.appendChild(sunText);
+            elements.messierChart.appendChild(sunGroup);
+        }
+
+        const moonProj = getProj(astroDetails.moon.ra, astroDetails.moon.dec);
+        const moonRadius = (astroDetails.moon.illumination * 60 + 20) * (showPolar ? (rMax / 90) : (skyInnerWidth / 360));
         const impactGroup = createSvgNode('g', { 'clip-path': 'url(#plotClip)', filter: 'url(#softBlur)' });
-        impactGroup.appendChild(createSvgNode('circle', { cx: moonX, cy: moonY, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
-        if (moonX - moonRadius < skyPlot.left) {
-            impactGroup.appendChild(createSvgNode('circle', { cx: moonX + skyInnerWidth, cy: moonY, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
-        }
-        if (moonX + moonRadius > skyPlot.left + skyInnerWidth) {
-            impactGroup.appendChild(createSvgNode('circle', { cx: moonX - skyInnerWidth, cy: moonY, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
-        }
-        elements.messierChart.appendChild(impactGroup);
+        
+        if (moonProj.visible) {
+            impactGroup.appendChild(createSvgNode('circle', { cx: moonProj.x, cy: moonProj.y, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
+            
+            if (!showPolar) {
+                if (moonProj.x - moonRadius < skyPlot.left) {
+                    impactGroup.appendChild(createSvgNode('circle', { cx: moonProj.x + skyInnerWidth, cy: moonProj.y, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
+                }
+                if (moonProj.x + moonRadius > skyPlot.left + skyInnerWidth) {
+                    impactGroup.appendChild(createSvgNode('circle', { cx: moonProj.x - skyInnerWidth, cy: moonProj.y, r: moonRadius, fill: 'url(#moonGlow)', style: 'pointer-events: none;' }));
+                }
+            }
+            elements.messierChart.appendChild(impactGroup);
 
-        const moonGroup = createSvgNode('g', { class: 'astro-object moon' });
-        moonGroup.appendChild(createSvgNode('circle', { cx: moonX, cy: moonY, r: 5 }));
-        const moonText = createSvgNode('text', { x: moonX, y: moonY + 15, 'text-anchor': 'middle' });
-        moonText.textContent = `M ${(astroDetails.moon.illumination * 100).toFixed(0)}%`;
-        moonGroup.appendChild(moonText);
-        elements.messierChart.appendChild(moonGroup);
+            const moonGroup = createSvgNode('g', { class: 'astro-object moon' });
+            moonGroup.appendChild(createSvgNode('circle', { cx: moonProj.x, cy: moonProj.y, r: 5 }));
+            const moonText = createSvgNode('text', { x: moonProj.x, y: moonProj.y + 15, 'text-anchor': 'middle' });
+            moonText.textContent = `M ${(astroDetails.moon.illumination * 100).toFixed(0)}%`;
+            moonGroup.appendChild(moonText);
+            elements.messierChart.appendChild(moonGroup);
+        }
 
         if (showPlanets) {
             const planetSymbols = {
@@ -740,13 +917,12 @@
                 Neptune: '♆'
             };
             Object.entries(astroDetails.planets).forEach(([name, pos]) => {
-                const px = getChartX(pos.ra);
-                const py = getChartY(pos.dec);
-                if (px < skyPlot.left || px > skyPlot.left + skyInnerWidth) return;
+                const proj = getProj(pos.ra, pos.dec);
+                if (!proj.visible) return;
                 
                 const planetGroup = createSvgNode('g', { class: `astro-object planet is-${name.toLowerCase()}` });
-                planetGroup.appendChild(createSvgNode('circle', { cx: px, cy: py, r: 2.0 }));
-                const planetText = createSvgNode('text', { x: px, y: py + 13, 'text-anchor': 'middle' });
+                planetGroup.appendChild(createSvgNode('circle', { cx: proj.x, cy: proj.y, r: 2.0 }));
+                const planetText = createSvgNode('text', { x: proj.x, y: proj.y + 11, 'text-anchor': 'middle' });
                 planetText.textContent = planetSymbols[name] || '';
                 planetGroup.appendChild(planetText);
                 elements.messierChart.appendChild(planetGroup);
@@ -754,7 +930,7 @@
         }
 
         const legendX = width - skyPlot.right - 260;
-        const legendY = skyPlot.top + skyInnerHeight - 78;
+        const legendY = showPolar ? (height - skyPlot.bottom - 60) : (skyPlot.top + skyInnerHeight - 78);
         const locationLegend = createSvgNode('g', { transform: `translate(${legendX}, ${legendY})` });
         locationLegend.appendChild(createSvgNode('rect', { width: 250, height: 54, rx: 2, class: 'messier-location-legend-bg' }));
         locationLegend.appendChild(createSvgNode('text', { x: 10, y: 15, class: 'messier-location-text' })).textContent = `${CFG_LOC.name} | ${CFG_LOC.lat.toFixed(2)}°N ${CFG_LOC.lon.toFixed(2)}°E`;
@@ -767,8 +943,12 @@
 
         catalog.forEach(item => {
             const captured = capturedIds.has(item.id);
-            const pointX = getChartX(item.raDegrees);
-            const pointY = getChartY(item.decDegrees);
+            const proj = getProj(item.raDegrees, item.decDegrees);
+
+            if (!proj.visible) return;
+            
+            const pointX = proj.x;
+            const pointY = proj.y;
             const point = createMessierPointShape(item, pointX, pointY, captured);
 
             if (captured) {
@@ -822,6 +1002,66 @@
                 elements.togglePlanetsBtn.classList.toggle('is-active', showPlanets);
                 logger.info('Toggled planets overlay', { showPlanets });
                 renderMessierChart();
+            });
+        }
+
+        if (elements.togglePolarBtn) {
+            elements.togglePolarBtn.addEventListener('click', () => {
+                showPolar = !showPolar;
+                if (showPolar) {
+                    const astroDetails = astro.getAstroDetails(CFG_LOC, buildSelectedDateTime());
+                    viewRa = astroDetails.lst;
+                    viewDec = CFG_LOC.lat;
+                    if (elements.togglePlayBtn) elements.togglePlayBtn.hidden = false;
+                } else {
+                    stopAutoRotation();
+                    if (elements.togglePlayBtn) elements.togglePlayBtn.hidden = true;
+                }
+                elements.togglePolarBtn.classList.toggle('is-active', showPolar);
+                logger.info('Toggled view mode', { mode: showPolar ? '3D' : 'Flat' });
+                renderMessierChart();
+            });
+        }
+
+        if (elements.togglePlayBtn) {
+            elements.togglePlayBtn.addEventListener('click', () => {
+                if (isAutoRotating) {
+                    stopAutoRotation();
+                } else {
+                    startAutoRotation();
+                }
+            });
+        }
+
+        if (elements.messierChart) {
+            elements.messierChart.style.cursor = showPolar ? 'grab' : 'default';
+            
+            elements.messierChart.addEventListener('mousedown', (e) => {
+                if (!showPolar) return;
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                elements.messierChart.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging || !showPolar) return;
+                const dx = e.clientX - lastMouseX;
+                const dy = e.clientY - lastMouseY;
+                
+                viewRa = (viewRa - dx * 0.2 + 360) % 360;
+                viewDec = Math.max(-90, Math.min(90, viewDec + dy * 0.2));
+                
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                renderMessierChart();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                if (elements.messierChart) {
+                    elements.messierChart.style.cursor = showPolar ? 'grab' : 'default';
+                }
             });
         }
 

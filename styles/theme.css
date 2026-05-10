@@ -480,7 +480,10 @@ nav.nav-exiting .nav-item {
 }
 
 .messier-chart-plot {
-    fill: rgba(7, 7, 9, 0.92);
+    fill: rgba(30, 32, 35, 0.4);
+    stroke: rgba(180, 180, 180, 0.2);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 15px rgba(180, 180, 180, 0.1));
 }
 
 .messier-altitude-plot {
@@ -733,6 +736,111 @@ nav.nav-exiting .nav-item {
     display: flex;
     gap: 16px;
     justify-content: flex-start;
+    align-items: center;
+}
+
+.messier-view-toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.messier-view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: rgba(224, 224, 224, 0.45);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.view-switch-track {
+    width: 32px;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    position: relative;
+    border: 0.8px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-switch-knob {
+    width: 10px;
+    height: 10px;
+    background: rgba(224, 224, 224, 0.5);
+    border-radius: 50%;
+    position: absolute;
+    top: 2.2px;
+    left: 3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.messier-view-toggle.is-active .view-switch-track {
+    background: rgba(197, 160, 89, 0.15);
+    border-color: rgba(197, 160, 89, 0.3);
+}
+
+.messier-view-toggle.is-active .view-switch-knob {
+    transform: translateX(16px);
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(197, 160, 89, 0.3);
+}
+
+.messier-view-toggle.is-active .view-label.is-3d {
+    color: var(--accent);
+}
+
+.messier-view-toggle:not(.is-active) .view-label.is-flat {
+    color: var(--text-main);
+}
+
+.messier-toggle-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0 4px;
+}
+
+.messier-toggle-btn[hidden] {
+    display: none;
+}
+
+.toggle-icon.is-play {
+    position: relative;
+    width: 0;
+    height: 0;
+    border-left: 8px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    background: none;
+    border-radius: 0;
+    margin-right: 4px;
+    border-width: 5px 0 5px 8px; /* Fixed triangle sizing */
+}
+
+.messier-toggle-btn.is-active .toggle-icon.is-play {
+    width: 8px;
+    height: 10px;
+    border: none;
+    background: none;
+    display: flex;
+    gap: 2px;
+}
+
+.messier-toggle-btn.is-active .toggle-icon.is-play::before,
+.messier-toggle-btn.is-active .toggle-icon.is-play::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 10px;
+    background: currentColor;
 }
 
 .messier-toggle-btn {
