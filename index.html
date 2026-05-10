@@ -84,6 +84,20 @@
                 </div>
             </div>
         </div>
+        <div class="messier-altitude-shell">
+            <div class="messier-altitude-header">
+                <div class="messier-altitude-kicker">Sun / Moon</div>
+                <div class="messier-altitude-controls">
+                    <input class="messier-date-input" id="messier-date-input" type="date" aria-label="Select date">
+                    <button class="messier-date-btn" id="messier-date-prev" type="button" aria-label="Previous date">Prev</button>
+                    <button class="messier-date-btn" id="messier-date-today" type="button" aria-label="Today">Today</button>
+                    <button class="messier-date-btn" id="messier-date-next" type="button" aria-label="Next date">Next</button>
+                </div>
+            </div>
+            <div class="messier-altitude-frame">
+                <svg id="messier-altitude-chart" class="messier-chart messier-altitude-chart" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sun and moon altitude chart"></svg>
+            </div>
+        </div>
     </section>
 
     <main class="gallery" id="gallery"></main>

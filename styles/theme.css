@@ -243,6 +243,67 @@ nav.nav-exiting .nav-item {
         inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
+.messier-altitude-shell {
+    margin-top: 18px;
+    padding: 18px 22px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.messier-altitude-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.messier-altitude-kicker {
+    font-size: 0.82rem;
+    letter-spacing: 0.18rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.messier-altitude-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.messier-date-btn,
+.messier-date-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.1rem;
+    text-transform: uppercase;
+}
+
+.messier-date-btn {
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
+}
+
+.messier-date-btn:hover,
+.messier-date-input:hover,
+.messier-date-input:focus {
+    color: var(--text-main);
+    border-color: rgba(197, 160, 89, 0.32);
+    outline: none;
+}
+
+.messier-date-input {
+    padding: 7px 10px;
+    min-width: 154px;
+}
+
 .messier-chart-header {
     display: block;
     margin: 0;
@@ -399,6 +460,15 @@ nav.nav-exiting .nav-item {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
+.messier-altitude-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
 .messier-chart {
     width: 100%;
     height: auto;
@@ -437,19 +507,13 @@ nav.nav-exiting .nav-item {
 }
 
 .messier-altitude-curve.is-sun {
-    stroke: rgba(212, 175, 55, 0.8);
-    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.16));
+    stroke: rgba(212, 175, 55, 0.45);
+    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.08));
 }
 
 .messier-altitude-curve.is-moon {
-    stroke: rgba(142, 202, 230, 0.74);
-    filter: drop-shadow(0 0 4px rgba(142, 202, 230, 0.12));
-}
-
-.messier-altitude-zero-line {
-    stroke: rgba(255, 255, 255, 0.18);
-    stroke-width: 1;
-    stroke-dasharray: 5 4;
+    stroke: rgba(160, 160, 160, 0.42);
+    filter: drop-shadow(0 0 2px rgba(160, 160, 160, 0.06));
 }
 
 .messier-altitude-now-line {
@@ -468,7 +532,7 @@ nav.nav-exiting .nav-item {
 }
 
 .messier-altitude-dot.is-moon {
-    fill: rgba(142, 202, 230, 0.92);
+    fill: rgba(160, 160, 160, 0.92);
     stroke: rgba(7, 7, 9, 0.8);
 }
 
@@ -482,7 +546,7 @@ nav.nav-exiting .nav-item {
 }
 
 .messier-altitude-event.is-moon .messier-altitude-event-dot {
-    fill: rgba(142, 202, 230, 0.95);
+    fill: rgba(160, 160, 160, 0.95);
 }
 
 .messier-altitude-event-text {
@@ -501,7 +565,7 @@ nav.nav-exiting .nav-item {
 }
 
 .messier-altitude-event.is-moon .messier-altitude-event-text {
-    fill: rgba(142, 202, 230, 0.8);
+    fill: rgba(190, 190, 190, 0.78);
 }
 
 .messier-axis-label {

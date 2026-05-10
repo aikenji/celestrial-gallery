@@ -10,6 +10,8 @@
     let showConstellations = false;
     let pendingMessierFocusId = null;
     let messierHoverTimer = null;
+    let selectedDate = new Date();
+    let dateEventsBound = false;
 
     const CFG_LOC = astro.createObserverLocation({
         name: 'Changzhou, CN',
@@ -109,22 +111,119 @@
         return node;
     }
 
+    function formatDateInputValue(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function buildSelectedDateTime() {
+        const now = new Date();
+        return new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds(),
+            now.getMilliseconds()
+        );
+    }
+
+    function syncDateInput() {
+        if (elements.messierDateInput) {
+            elements.messierDateInput.value = formatDateInputValue(selectedDate);
+        }
+    }
+
+    function resetSelectedDateToToday() {
+        const today = new Date();
+        selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        syncDateInput();
+        renderMessierChart();
+    }
+
+    function shiftSelectedDate(days) {
+        selectedDate = new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate() + days
+        );
+        syncDateInput();
+        renderMessierChart();
+    }
+
+    function bindDateEvents() {
+        if (dateEventsBound) {
+            return;
+        }
+
+        syncDateInput();
+
+        if (elements.messierDatePrev) {
+            elements.messierDatePrev.addEventListener('click', () => shiftSelectedDate(-1));
+        }
+
+        if (elements.messierDateNext) {
+            elements.messierDateNext.addEventListener('click', () => shiftSelectedDate(1));
+        }
+
+        if (elements.messierDateToday) {
+            elements.messierDateToday.addEventListener('click', () => resetSelectedDateToToday());
+        }
+
+        if (elements.messierDateInput) {
+            elements.messierDateInput.addEventListener('change', event => {
+                const nextValue = event.target.value;
+                if (!nextValue) {
+                    syncDateInput();
+                    return;
+                }
+
+                const [year, month, day] = nextValue.split('-').map(Number);
+                selectedDate = new Date(year, month - 1, day);
+                renderMessierChart();
+            });
+        }
+
+        dateEventsBound = true;
+    }
+
+    function getMoonPhaseSymbol(phaseLabel) {
+        const phaseEmojis = {
+            'New Moon': '🌑',
+            'Waxing Crescent': '🌒',
+            'First Quarter': '🌓',
+            'Waxing Gibbous': '🌔',
+            'Full Moon': '🌕',
+            'Waning Gibbous': '🌖',
+            'Last Quarter': '🌗',
+            'Waning Crescent': '🌘'
+        };
+
+        return phaseEmojis[phaseLabel] || '🌕';
+    }
+
     function renderMessierChart() {
         const catalog = messierData.getMessierSkyData();
         const capturedIds = messierData.getCapturedMessierIds();
-        const astroDetails = astro.getAstroDetails(CFG_LOC);
+        const astroNow = buildSelectedDateTime();
+        const astroDetails = astro.getAstroDetails(CFG_LOC, astroNow);
         const altitudeSeries = astro.getTodayAltitudeSeries(CFG_LOC, astroDetails.now, 10);
         const currentMoonAlt = astro.getEquatorialAltitude(CFG_LOC, astroDetails.moon.ra, astroDetails.moon.dec, astroDetails.lst);
         const sunEvents = astro.getAltitudeEvents(altitudeSeries, 'sunAlt', -0.833);
         const moonEvents = astro.getAltitudeEvents(altitudeSeries, 'moonAlt', 0.125);
         const width = 1200;
-        const height = 940;
-        const skyPlot = { top: 52, right: 64, bottom: 304, left: 54 };
-        const altitudePlot = { top: 732, right: 64, bottom: 62, left: 54 };
+        const height = 720;
+        const skyPlot = { top: 52, right: 64, bottom: 62, left: 54 };
+        const altitudeWidth = 1200;
+        const altitudeHeight = 280;
+        const altitudePlot = { top: 26, right: 64, bottom: 62, left: 54 };
         const skyInnerWidth = width - skyPlot.left - skyPlot.right;
         const skyInnerHeight = height - skyPlot.top - skyPlot.bottom;
-        const altitudeInnerWidth = width - altitudePlot.left - altitudePlot.right;
-        const altitudeInnerHeight = height - altitudePlot.top - altitudePlot.bottom;
+        const altitudeInnerWidth = altitudeWidth - altitudePlot.left - altitudePlot.right;
+        const altitudeInnerHeight = altitudeHeight - altitudePlot.top - altitudePlot.bottom;
 
         logger.info('Rendering messier chart', {
             showEcliptic,
@@ -178,7 +277,7 @@
             return path.trim();
         }
 
-        function renderAltitudeEvent(event, options) {
+        function renderAltitudeEvent(targetSvg, event, options) {
             if (!event || event.localHours < 0 || event.localHours > 24) {
                 return;
             }
@@ -204,7 +303,7 @@
             });
             text.textContent = `${options.label} ${formatHourLabel(event.localHours)}`;
             marker.appendChild(text);
-            elements.messierChart.appendChild(marker);
+            targetSvg.appendChild(marker);
         }
 
         function clamp(value, min, max) {
@@ -295,6 +394,8 @@
         elements.messierTotalCount.textContent = String(catalog.length || 110);
         elements.messierChart.setAttribute('viewBox', `0 0 ${width} ${height}`);
         elements.messierChart.innerHTML = '';
+        elements.messierAltitudeChart.setAttribute('viewBox', `0 0 ${altitudeWidth} ${altitudeHeight}`);
+        elements.messierAltitudeChart.innerHTML = '';
 
         const defs = createSvgNode('defs');
         const softBlur = createSvgNode('filter', { id: 'softBlur', x: '-50%', y: '-50%', width: '200%', height: '200%' });
@@ -315,16 +416,24 @@
         const plotClip = createSvgNode('clipPath', { id: 'plotClip' });
         plotClip.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight }));
         defs.appendChild(plotClip);
+        elements.messierChart.appendChild(defs);
+
+        const altitudeDefs = createSvgNode('defs');
         const altitudeClip = createSvgNode('clipPath', { id: 'altitudeClip' });
         altitudeClip.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight }));
-        defs.appendChild(altitudeClip);
-        elements.messierChart.appendChild(defs);
+        altitudeDefs.appendChild(altitudeClip);
+        const altitudeNoise = createSvgNode('filter', { id: 'altitudeNoise' });
+        altitudeNoise.appendChild(createSvgNode('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.6', numOctaves: '3', stitchTiles: 'stitch' }));
+        altitudeNoise.appendChild(createSvgNode('feColorMatrix', { type: 'matrix', values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0' }));
+        altitudeDefs.appendChild(altitudeNoise);
+        elements.messierAltitudeChart.appendChild(altitudeDefs);
 
         elements.messierChart.appendChild(createSvgNode('rect', { x: 0, y: 0, width, height, class: 'messier-chart-backdrop' }));
         elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-plot' }));
-        elements.messierChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-altitude-plot' }));
         elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
-        elements.messierChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
+        elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: 0, y: 0, width: altitudeWidth, height: altitudeHeight, class: 'messier-chart-backdrop' }));
+        elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-altitude-plot' }));
+        elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, filter: 'url(#altitudeNoise)', style: 'pointer-events: none;' }));
 
         const drawRaBand = (centerRa, halfWidth, fill) => {
             const r1 = (centerRa - halfWidth + 360) % 360;
@@ -458,7 +567,7 @@
         elements.messierChart.appendChild(midnightLabel);
 
         elements.messierChart.appendChild(createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-frame-outline' }));
-        elements.messierChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-chart-frame-outline' }));
+        elements.messierAltitudeChart.appendChild(createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-chart-frame-outline' }));
         const decTitle = createSvgNode('text', { x: 24, y: skyPlot.top - 12, class: 'messier-axis-title' });
         decTitle.textContent = 'DEC';
         elements.messierChart.appendChild(decTitle);
@@ -486,7 +595,7 @@
 
         [0, 30, 60, 90].forEach(altitude => {
             const y = getAltitudeChartY(altitude);
-            elements.messierChart.appendChild(createSvgNode('line', {
+            elements.messierAltitudeChart.appendChild(createSvgNode('line', {
                 x1: altitudePlot.left,
                 y1: y,
                 x2: altitudePlot.left + altitudeInnerWidth,
@@ -499,12 +608,12 @@
                 class: 'messier-axis-label messier-axis-label-dec'
             });
             label.textContent = altitude > 0 ? `+${altitude}°` : '0°';
-            elements.messierChart.appendChild(label);
+            elements.messierAltitudeChart.appendChild(label);
         });
 
         for (let hour = 0; hour <= 24; hour += 3) {
             const x = getAltitudeChartX(hour);
-            elements.messierChart.appendChild(createSvgNode('line', {
+            elements.messierAltitudeChart.appendChild(createSvgNode('line', {
                 x1: x,
                 y1: altitudePlot.top,
                 x2: x,
@@ -517,23 +626,23 @@
                 class: 'messier-axis-label messier-axis-label-ra'
             });
             label.textContent = `${String(hour % 24).padStart(2, '0')}:00`;
-            elements.messierChart.appendChild(label);
+            elements.messierAltitudeChart.appendChild(label);
         }
 
-        elements.messierChart.appendChild(createSvgNode('line', {
+        elements.messierAltitudeChart.appendChild(createSvgNode('line', {
             x1: altitudePlot.left,
             y1: getAltitudeChartY(0),
             x2: altitudePlot.left + altitudeInnerWidth,
             y2: getAltitudeChartY(0),
-            class: 'messier-altitude-zero-line'
+            class: 'messier-grid-line'
         }));
 
-        elements.messierChart.appendChild(createSvgNode('path', {
+        elements.messierAltitudeChart.appendChild(createSvgNode('path', {
             d: buildVisibleAltitudePath('sunAlt'),
             class: 'messier-altitude-curve is-sun',
             'clip-path': 'url(#altitudeClip)'
         }));
-        elements.messierChart.appendChild(createSvgNode('path', {
+        elements.messierAltitudeChart.appendChild(createSvgNode('path', {
             d: buildVisibleAltitudePath('moonAlt'),
             class: 'messier-altitude-curve is-moon',
             'clip-path': 'url(#altitudeClip)'
@@ -541,7 +650,7 @@
 
         const currentHour = (astroDetails.now - altitudeSeries.start) / (60 * 60 * 1000);
         const currentSunAltX = getAltitudeChartX(currentHour);
-        elements.messierChart.appendChild(createSvgNode('line', {
+        elements.messierAltitudeChart.appendChild(createSvgNode('line', {
             x1: currentSunAltX,
             y1: altitudePlot.top,
             x2: currentSunAltX,
@@ -561,28 +670,34 @@
             r: 3.2,
             class: 'messier-altitude-dot is-moon'
         });
-        elements.messierChart.appendChild(sunDot);
-        elements.messierChart.appendChild(moonDot);
-        renderAltitudeEvent(sunEvents.rise, { label: 'Sunrise', variant: 'is-sun', anchor: 'start', textDx: 8 });
-        renderAltitudeEvent(sunEvents.set, { label: 'Sunset', variant: 'is-sun', anchor: 'end', textDx: -8 });
-        renderAltitudeEvent(sunEvents.transit, { label: 'Sun Max', variant: 'is-sun', anchor: 'middle' });
-        renderAltitudeEvent(moonEvents.rise, { label: 'Moonrise', variant: 'is-moon', anchor: 'start', textDx: 8 });
-        renderAltitudeEvent(moonEvents.set, { label: 'Moonset', variant: 'is-moon', anchor: 'end', textDx: -8 });
-        renderAltitudeEvent(moonEvents.transit, { label: 'Moon Max', variant: 'is-moon', anchor: 'middle' });
+        elements.messierAltitudeChart.appendChild(sunDot);
+        elements.messierAltitudeChart.appendChild(moonDot);
+        renderAltitudeEvent(elements.messierAltitudeChart, sunEvents.rise, { label: 'Rise', variant: 'is-sun', anchor: 'start', textDx: 8 });
+        renderAltitudeEvent(elements.messierAltitudeChart, sunEvents.set, { label: 'Set', variant: 'is-sun', anchor: 'end', textDx: -8 });
+        renderAltitudeEvent(elements.messierAltitudeChart, sunEvents.transit, {
+            label: `SUN ${sunEvents.transit ? sunEvents.transit.altitude.toFixed(0) : ''}° |`,
+            variant: 'is-sun',
+            anchor: 'middle'
+        });
+        renderAltitudeEvent(elements.messierAltitudeChart, moonEvents.rise, { label: 'Rise', variant: 'is-moon', anchor: 'start', textDx: 8 });
+        renderAltitudeEvent(elements.messierAltitudeChart, moonEvents.set, { label: 'Set', variant: 'is-moon', anchor: 'end', textDx: -8 });
+        renderAltitudeEvent(elements.messierAltitudeChart, moonEvents.transit, {
+            label: `MOON ${moonEvents.transit ? moonEvents.transit.altitude.toFixed(0) : ''}° |`,
+            variant: 'is-moon',
+            anchor: 'middle'
+        });
 
         const formatTime = date => `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')} UTC`;
         const formatLocal = date => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} LT`;
         const altitudeLegend = createSvgNode('g', {
             transform: `translate(${width - altitudePlot.right - 250}, ${altitudePlot.top + 10})`
         });
-        altitudeLegend.appendChild(createSvgNode('rect', { width: 240, height: 68, rx: 2, class: 'messier-location-legend-bg' }));
-        altitudeLegend.appendChild(createSvgNode('text', { x: 10, y: 15, class: 'messier-location-text' })).textContent = `${formatLocal(astroDetails.now)} | ${formatTime(astroDetails.now)}`;
-        altitudeLegend.appendChild(createSvgNode('line', { x1: 10, y1: 30, x2: 34, y2: 30, class: 'messier-altitude-curve is-sun' }));
-        altitudeLegend.appendChild(createSvgNode('text', { x: 42, y: 34, class: 'messier-location-text' })).textContent = `Sun Alt ${astroDetails.sun.alt.toFixed(1)}° | ${astroDetails.sun.status}`;
-        altitudeLegend.appendChild(createSvgNode('line', { x1: 10, y1: 47, x2: 34, y2: 47, class: 'messier-altitude-curve is-moon' }));
-        altitudeLegend.appendChild(createSvgNode('text', { x: 42, y: 51, class: 'messier-location-text' })).textContent = `Moon Alt ${currentMoonAlt.toFixed(1)}°`;
-        altitudeLegend.appendChild(createSvgNode('text', { x: 10, y: 66, class: 'messier-location-text' })).textContent = `Phase ${astroDetails.moon.phaseLabel}`;
-        elements.messierChart.appendChild(altitudeLegend);
+        altitudeLegend.appendChild(createSvgNode('rect', { width: 240, height: 62, rx: 2, class: 'messier-location-legend-bg' }));
+        altitudeLegend.appendChild(createSvgNode('text', { x: 10, y: 18, class: 'messier-location-text' })).textContent = `${formatLocal(astroDetails.now)} | ${formatTime(astroDetails.now)}`;
+        altitudeLegend.appendChild(createSvgNode('text', { x: 10, y: 36, class: 'messier-location-text' })).textContent = `Sun ${astroDetails.sun.alt.toFixed(1)}° | ${astroDetails.sun.status}`;
+        altitudeLegend.appendChild(createSvgNode('text', { x: 10, y: 54, class: 'messier-location-text' }))
+            .textContent = `Moon ${currentMoonAlt.toFixed(1)}° | ${getMoonPhaseSymbol(astroDetails.moon.phaseLabel)} ${astroDetails.moon.phaseLabel}`;
+        elements.messierAltitudeChart.appendChild(altitudeLegend);
 
         const sunX = getChartX(astroDetails.sun.ra);
         const sunY = getChartY(astroDetails.sun.dec);
@@ -665,6 +780,8 @@
     }
 
     function bindToggleEvents() {
+        bindDateEvents();
+
         if (elements.toggleEclipticBtn) {
             elements.toggleEclipticBtn.addEventListener('click', () => {
                 showEcliptic = !showEcliptic;
