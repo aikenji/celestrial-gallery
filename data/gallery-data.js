@@ -11,6 +11,20 @@ const categoryLabels = {
 
 const photos = [
     {
+        title: 'Venus - 2026.05.11',
+        meta: 'C925 / QHY715MC',
+        url: 'library/ven-2026-05-11.jpg',
+        sort: 1,
+        tags: ['PLANETS', 'VENUS']
+    },
+    {
+        title: 'Solar Chromosphere - 2026.05.05',
+        meta: 'Lunt 60MT / QHY5III678M',
+        url: 'library/solar chromosphere-2026-05-05.jpg',
+        sort: 1,
+        tags: ['PLANETS', 'SOLAR']
+    },
+    {
         title: 'Jupiter - 2022.11.06',
         meta: 'C925 / QHY715MC',
         url: 'library/jup-2022-11-06.jpg',
@@ -141,56 +155,56 @@ const photos = [
         meta: 'Satellite Galaxy | Messier 32',
         url: 'library/Messier catalog/M32.jpg',
         sort: 2,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M65',
         meta: 'Galaxy | Messier 65',
         url: 'library/Messier catalog/M65.jpg',
         sort: 3,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M66',
         meta: 'Galaxy | Messier 66',
         url: 'library/Messier catalog/M66.jpg',
         sort: 4,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M81',
         meta: 'Bode\'s Galaxy | Messier 81',
         url: 'library/Messier catalog/M81.jpg',
         sort: 5,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M82',
         meta: 'Cigar Galaxy | Messier 82',
         url: 'library/Messier catalog/M82.jpg',
         sort: 6,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M84',
         meta: 'Galaxy | Messier 84',
         url: 'library/Messier catalog/M84.jpg',
         sort: 7,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M86',
         meta: 'Galaxy | Messier 86',
         url: 'library/Messier catalog/M86.jpg',
         sort: 8,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M87',
         meta: 'Galaxy | Messier 87',
         url: 'library/Messier catalog/M87.jpg',
         sort: 9,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'M101',
@@ -211,7 +225,7 @@ const photos = [
         meta: 'Satellite Galaxy | Messier 110',
         url: 'library/Messier catalog/M110.jpg',
         sort: 12,
-        tags: ['GALAXIES', 'MESSIER']
+        tags: ['MESSIER']
     },
     {
         title: 'Markarian Chain',

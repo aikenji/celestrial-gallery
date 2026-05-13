@@ -4,6 +4,8 @@
     const { categoryOrder, categoryLabels = {}, photos } = window.galleryData;
 
     const subcategoryLabels = {
+        SOLAR: 'Sun',
+        VENUS: 'Venus',
         JUPITER: 'Jupiter',
         SATURN: 'Saturn',
         MARS: 'Mars',
@@ -18,7 +20,7 @@
     };
 
     const subcategoryOrders = {
-        PLANETS: ['JUPITER', 'SATURN', 'MARS', 'MERCURY', 'URANUS', 'NEPTUNE', 'MOON', 'OVERVIEW'],
+        PLANETS: ['SOLAR', 'MOON', 'MERCURY', 'VENUS', 'MARS', 'JUPITER', 'SATURN', 'URANUS', 'NEPTUNE', 'OVERVIEW'],
         PLAY: ['2026.01.27'],
         MESSIER: ['CHART', 'CATALOG']
     };
