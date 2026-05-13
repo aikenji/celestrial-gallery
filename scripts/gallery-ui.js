@@ -135,31 +135,44 @@
         elements.gallery.classList.toggle('gallery-messier', category === 'MESSIER');
 
         const isChartMode = category === 'MESSIER' && subcategory === 'CHART';
-        messier.showMessierChart(isChartMode);
-
-        if (isChartMode) {
-            messier.renderMessierChart();
-            return;
+        
+        if (state.searchQuery) {
+            messier.showMessierChart(false);
+        } else {
+            messier.showMessierChart(isChartMode);
+            if (isChartMode) {
+                messier.renderMessierChart();
+                return;
+            }
         }
 
-        const items = category === 'ALL'
-            ? getHomePhotos(4)
-            : getCategoryPhotos(category, subcategory)
-                .slice()
-                .sort((left, right) => {
-                    if (category === 'MESSIER') {
-                        const messierDiff = messierData.getMessierSortValue(left) - messierData.getMessierSortValue(right);
-                        if (messierDiff !== 0) {
-                            return messierDiff;
+        let items;
+        if (state.searchQuery) {
+            const query = state.searchQuery.toLowerCase();
+            items = core.photos.filter(photo =>
+                photo.title.toLowerCase().includes(query) ||
+                (photo.meta && photo.meta.toLowerCase().includes(query))
+            );
+        } else {
+            items = category === 'ALL'
+                ? getHomePhotos(4)
+                : getCategoryPhotos(category, subcategory)
+                    .slice()
+                    .sort((left, right) => {
+                        if (category === 'MESSIER') {
+                            const messierDiff = messierData.getMessierSortValue(left) - messierData.getMessierSortValue(right);
+                            if (messierDiff !== 0) {
+                                return messierDiff;
+                            }
                         }
-                    }
-
-                    return (left.sort || 0) - (right.sort || 0) || (left.title || '').localeCompare(right.title || '');
-                });
+                        return (left.sort || 0) - (right.sort || 0) || (left.title || '').localeCompare(right.title || '');
+                    });
+        }
 
         logger.info('Rendering photos', {
             category,
             subcategory,
+            searchQuery: state.searchQuery,
             count: items.length
         });
 
@@ -289,6 +302,33 @@
         });
 
         messier.bindToggleEvents();
+
+        if (elements.searchToggle) {
+            elements.searchToggle.addEventListener('click', () => {
+                const isActive = elements.searchContainer.classList.toggle('is-active');
+                elements.searchToggle.classList.toggle('is-active');
+                if (isActive) {
+                    elements.searchInput.focus();
+                } else {
+                    elements.searchInput.value = '';
+                    state.searchQuery = '';
+                    filterPhotos(state.currentCategory, state.currentSubcategory);
+                }
+            });
+        }
+
+        if (elements.searchInput) {
+            elements.searchInput.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                if (state.searchQuery) {
+                    replayGalleryTitle('SEARCH RESULTS');
+                    renderPhotos(state.currentCategory, state.currentSubcategory);
+                } else {
+                    filterPhotos(state.currentCategory, state.currentSubcategory);
+                }
+            });
+        }
+
         logger.debug('Bound global UI events');
     }
 

@@ -30,6 +30,9 @@
         lightbox: document.getElementById('lightbox'),
         lightboxImg: document.getElementById('lightbox-img'),
         navGroup: document.getElementById('nav-group'),
+        searchToggle: document.getElementById('search-toggle'),
+        searchContainer: document.getElementById('search-container'),
+        searchInput: document.getElementById('search-input'),
         subtitle: document.querySelector('header .subtitle'),
         galleryLogo: document.getElementById('gallery-title'),
         titleCurrent: document.querySelector('#gallery-title .title-layer-current'),
@@ -57,6 +60,7 @@
     const state = {
         currentCategory: 'ALL',
         currentSubcategory: null,
+        searchQuery: '',
         isMessierMode: false,
         subtitleTransitionTimer: null
     };
