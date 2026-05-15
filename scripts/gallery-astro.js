@@ -223,6 +223,76 @@
         return { rise, set, transit };
     }
 
+    function getObservingNightSeries(location, now = new Date(), stepMinutes = 30) {
+        // Start from 12:00 PM (noon) today
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+        // End at 12:00 PM (noon) tomorrow
+        const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+        const points = [];
+
+        for (let cursor = start.getTime(); cursor <= end.getTime(); cursor += stepMinutes * 60 * 1000) {
+            const sampleDate = new Date(cursor);
+            const details = getAstroDetails(location, sampleDate);
+            points.push({
+                date: sampleDate,
+                localHours: (sampleDate - start) / (60 * 60 * 1000), // Relative to start (0 to 24)
+                sunAlt: details.sun.alt,
+                moonAlt: getEquatorialAltitude(location, details.moon.ra, details.moon.dec, details.lst)
+            });
+        }
+
+        return { start, end, points };
+    }
+
+    function getMoonPhaseSymbol(phaseLabel) {
+        const phaseEmojis = {
+            'New Moon': '🌑',
+            'Waxing Crescent': '🌒',
+            'First Quarter': '🌓',
+            'Waxing Gibbous': '🌔',
+            'Full Moon': '🌕',
+            'Waning Gibbous': '🌖',
+            'Last Quarter': '🌗',
+            'Waning Crescent': '🌘'
+        };
+        return phaseEmojis[phaseLabel] || '🌕';
+    }
+
+    function formatHourLabel(localHours) {
+        const normalized = ((localHours % 24) + 24) % 24;
+        const wholeHours = Math.floor(normalized);
+        const minutes = Math.round((normalized - wholeHours) * 60);
+        const safeHours = minutes === 60 ? (wholeHours + 1) % 24 : wholeHours;
+        const safeMinutes = minutes === 60 ? 0 : minutes;
+        return `${String(safeHours).padStart(2, '0')}:${String(safeMinutes).padStart(2, '0')}`;
+    }
+
+    function project3D(ra, dec, viewRa, viewDec, cx, cy, rMax) {
+        const raRad = (ra - viewRa) * Math.PI / 180;
+        const decRad = dec * Math.PI / 180;
+        const rotDecRad = viewDec * Math.PI / 180;
+
+        const x = Math.cos(decRad) * Math.sin(raRad);
+        const y = Math.sin(decRad) * Math.cos(rotDecRad) - Math.cos(decRad) * Math.sin(rotDecRad) * Math.cos(raRad);
+        const z = Math.sin(decRad) * Math.sin(rotDecRad) + Math.cos(decRad) * Math.cos(rotDecRad) * Math.cos(raRad);
+
+        return {
+            x: cx + x * rMax,
+            y: cy - y * rMax,
+            z: z,
+            visible: z > 0
+        };
+    }
+
+    function boxesOverlap(a, b, paddingValue = 3) {
+        return !(
+            a.right + paddingValue < b.left ||
+            a.left - paddingValue > b.right ||
+            a.bottom + paddingValue < b.top ||
+            a.top - paddingValue > b.bottom
+        );
+    }
+
     ns.astro = {
         createObserverLocation,
         getEquatorialAltitude,
@@ -230,7 +300,12 @@
         getAstroDetails,
         getHourAngleForAltitude,
         getMoonPhaseLabel,
-        getTodayAltitudeSeries
+        getTodayAltitudeSeries,
+        getObservingNightSeries,
+        getMoonPhaseSymbol,
+        formatHourLabel,
+        project3D,
+        boxesOverlap
     };
 
     logger.info('Astro utilities initialized');

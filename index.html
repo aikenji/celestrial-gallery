@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/theme.css">
     <link rel="stylesheet" href="styles/gallery.css">
+    <link rel="stylesheet" href="styles/messier.css">
     <script src="data/gallery-data.js" defer></script>
     <script src="data/messier-catalog.js" defer></script>
     <script src="scripts/gallery-logger.js" defer></script>
@@ -15,6 +16,8 @@
     <script src="scripts/gallery-likes.js" defer></script>
     <script src="messier/gallery-messier-data.js" defer></script>
     <script src="messier/gallery-messier-constellations.js" defer></script>
+    <script src="messier/gallery-messier-chart.js" defer></script>
+    <script src="messier/gallery-messier-list.js" defer></script>
     <script src="messier/gallery-messier.js" defer></script>
     <script src="scripts/gallery-ui.js" defer></script>
     <script src="scripts/gallery.js" defer></script>
@@ -44,7 +47,6 @@
             <div class="messier-chart-header">
                 <div class="messier-chart-copy">
                     <div class="messier-chart-kicker">Messier Sky Chart</div>
-                    <div class="messier-chart-title">All 110 Messier Targets</div>
                 </div>
                 <div class="messier-chart-stats">
                     <span class="messier-stat-value" id="messier-captured-count">0</span>
@@ -120,7 +122,7 @@
                 </div>
             </div>
             <div class="messier-altitude-frame">
-                <svg id="messier-altitude-chart" class="messier-chart messier-altitude-chart" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sun and moon altitude chart"></svg>
+                <svg id="messier-altitude-chart" class="messier-chart messier-altitude-chart" viewBox="0 0 1200 280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sun and moon altitude chart"></svg>
             </div>
         </div>
         <div class="messier-recommend-shell">
