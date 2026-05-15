@@ -755,6 +755,7 @@
         altTitle.textContent = showPolar ? '' : 'ALT';
         elements.messierChart.appendChild(altTitle);
 
+        // Altitude Grid
         [0, 30, 60, 90].forEach(altitude => {
             const y = getAltitudeChartY(altitude);
             elements.messierAltitudeChart.appendChild(createSvgNode('line', {
@@ -771,6 +772,14 @@
             });
             label.textContent = altitude > 0 ? `+${altitude}°` : '0°';
             elements.messierAltitudeChart.appendChild(label);
+        });
+
+        // Add Twilight Bands to Main Chart
+        renderTwilightBands(elements.messierAltitudeChart, altitudeSeries, {
+            left: altitudePlot.left,
+            top: altitudePlot.top,
+            width: altitudeInnerWidth,
+            height: altitudeInnerHeight
         });
 
         for (let hour = 0; hour <= 24; hour += 3) {
@@ -975,6 +984,169 @@
                 label.addEventListener('blur', queueHideMessierPreview);
                 elements.messierChart.appendChild(label);
             });
+
+        renderMessierRecommendations(catalog, astroDetails, capturedIds);
+    }
+
+    function renderTwilightBands(svg, series, plotParams) {
+        const twilightLevels = [
+            { threshold: 0, class: 'twilight-day' },
+            { threshold: -6, class: 'twilight-civil' },
+            { threshold: -12, class: 'twilight-nautical' },
+            { threshold: -18, class: 'twilight-astronomical' },
+            { threshold: -90, class: 'twilight-night' }
+        ];
+
+        series.points.forEach((point, i) => {
+            if (i === 0) return;
+            const prev = series.points[i - 1];
+            const x1 = plotParams.left + (prev.localHours / 24) * plotParams.width;
+            const x2 = plotParams.left + (point.localHours / 24) * plotParams.width;
+            
+            const avgSunAlt = (prev.sunAlt + point.sunAlt) / 2;
+            let cssClass = 'twilight-night';
+            for (const level of twilightLevels) {
+                if (avgSunAlt >= level.threshold) {
+                    cssClass = level.class;
+                    break;
+                }
+            }
+
+            svg.insertBefore(createSvgNode('rect', {
+                x: x1,
+                y: plotParams.top,
+                width: x2 - x1,
+                height: plotParams.height,
+                class: cssClass
+            }), svg.firstChild);
+        });
+    }
+
+    function renderMessierRecommendations(catalog, astroDetails, capturedIds) {
+        if (!elements.messierRecommendList) return;
+        elements.messierRecommendList.innerHTML = '';
+
+        const midnightRa = astroDetails.midnightRa;
+        const altitudeSeries = astro.getTodayAltitudeSeries(CFG_LOC, astroDetails.now, 10);
+
+        const recommendations = catalog
+            .map(item => {
+                let raDiff = Math.abs(item.raDegrees - midnightRa);
+                if (raDiff > 180) raDiff = 360 - raDiff;
+                const captureScore = capturedIds.has(item.id) ? 1 : 0;
+                const magnitude = parseFloat(item.magnitude) || 15;
+                const transitAlt = 90 - Math.abs(CFG_LOC.lat - item.decDegrees);
+
+                return { ...item, raDiff, captureScore, magnitude, transitAlt };
+            })
+            .filter(item => item.transitAlt > 10)
+            .sort((a, b) => {
+                // 1. Proximity to midnight meridian (0 to 180)
+                if (Math.abs(a.raDiff - b.raDiff) > 15) return a.raDiff - b.raDiff;
+                // 2. Missing first
+                if (a.captureScore !== b.captureScore) return a.captureScore - b.captureScore;
+                // 3. Brightness
+                if (Math.abs(a.magnitude - b.magnitude) > 0.5) return a.magnitude - b.magnitude;
+                // 4. Peak altitude
+                return b.transitAlt - a.transitAlt;
+            })
+            .slice(0, 10);
+
+        recommendations.forEach(target => {
+            const isCaptured = capturedIds.has(target.id);
+            const row = document.createElement('div');
+            row.className = `messier-target-row ${isCaptured ? 'is-captured' : ''}`;
+            
+            const chartId = `recommend-chart-${target.id}`;
+            row.innerHTML = `
+                <div class="messier-target-row-content">
+                    <div class="messier-target-row-info">
+                        <div class="messier-target-id-row">
+                            ${target.id}
+                            <span class="messier-target-status ${isCaptured ? 'status-captured' : 'status-missing'}">
+                                ${isCaptured ? 'Captured' : 'Missing'}
+                            </span>
+                        </div>
+                        <div class="messier-target-meta-row">
+                            ${target.category} &middot; ${target.constellation}
+                        </div>
+                    </div>
+                    <div class="messier-target-row-chart" id="${chartId}"></div>
+                    <div class="messier-target-stats-row">
+                        <div>Peak Altitude: <b>${target.transitAlt.toFixed(0)}°</b></div>
+                        <div>Magnitude: <b>${target.magnitude.toFixed(1)}</b></div>
+                        <div>Transit RA: <b>${Math.floor(target.raDegrees / 15)}h</b></div>
+                    </div>
+                </div>
+            `;
+
+            row.onclick = () => {
+                const photo = messierData.getMessierPhotoById(target.id);
+                if (photo) {
+                    ns.ui.filterPhotos('MESSIER', 'CATALOG');
+                    window.setTimeout(() => {
+                        focusMessierCard(target.id);
+                        scrollToPendingMessierCard();
+                    }, 100);
+                }
+            };
+
+            elements.messierRecommendList.appendChild(row);
+            renderDetailedMiniChart(chartId, target, astroDetails.now, altitudeSeries);
+        });
+    }
+
+    function renderDetailedMiniChart(containerId, target, now, altitudeSeries) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const width = container.clientWidth || 800;
+        const height = 80;
+        const svg = createSvgNode('svg', {
+            viewBox: `0 0 ${width} ${height}`,
+            width: '100%',
+            height: '100%',
+            preserveAspectRatio: 'none'
+        });
+
+        const plotParams = { left: 0, top: 0, width: width, height: height };
+
+        // Background Twilight Bands
+        renderTwilightBands(svg, altitudeSeries, plotParams);
+
+        // Calculate Target Altitude Path
+        let path = '';
+        altitudeSeries.points.forEach((p, i) => {
+            const details = astro.getAstroDetails(CFG_LOC, p.date);
+            const alt = astro.getEquatorialAltitude(CFG_LOC, target.raDegrees, target.decDegrees, details.lst);
+            const x = (p.localHours / 24) * width;
+            const y = height - (Math.max(0, alt) / 90) * height;
+            
+            if (alt >= 0) {
+                path += (path === '' || (i > 0 && altitudeSeries.points[i-1].alt < 0) ? 'M' : ' L') + ` ${x} ${y}`;
+            }
+        });
+
+        if (path) {
+            svg.appendChild(createSvgNode('path', {
+                d: path,
+                fill: 'none',
+                stroke: 'var(--accent)',
+                'stroke-width': 2,
+                opacity: 0.9
+            }));
+        }
+
+        const localStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const currentX = ((now.getTime() - localStart.getTime()) / (24 * 60 * 60 * 1000)) * width;
+        if (currentX >= 0 && currentX <= width) {
+            svg.appendChild(createSvgNode('line', {
+                x1: currentX, y1: 0, x2: currentX, y2: height,
+                stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1, 'stroke-dasharray': '3,3'
+            }));
+        }
+
+        container.appendChild(svg);
     }
 
     function showMessierChart(visible) {

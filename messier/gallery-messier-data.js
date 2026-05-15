@@ -100,7 +100,9 @@
                     id,
                     raDegrees,
                     decDegrees,
-                    category: normalizeMessierCategory(item.T)
+                    category: normalizeMessierCategory(item.T),
+                    constellation: item.Con || '',
+                    magnitude: parseFloat(item.V) || 15
                 };
             })
             .filter(Boolean)

@@ -47,6 +47,7 @@
         messierCapturedCount: document.getElementById('messier-captured-count'),
         messierTotalCount: document.getElementById('messier-total-count'),
         messierHoverCard: document.getElementById('messier-hover-card'),
+        messierRecommendList: document.getElementById('messier-recommend-list'),
         messierHoverImage: document.getElementById('messier-hover-image'),
         messierHoverId: document.getElementById('messier-hover-id'),
         messierHoverMeta: document.getElementById('messier-hover-meta'),
