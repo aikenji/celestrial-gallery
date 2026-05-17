@@ -160,10 +160,6 @@
         const softBlur = ns.messier.createSvgNode('filter', { id: 'softBlur', x: '-50%', y: '-50%', width: '200%', height: '200%' });
         softBlur.appendChild(ns.messier.createSvgNode('feGaussianBlur', { stdDeviation: '12' }));
         defs.appendChild(softBlur);
-        const chartNoise = ns.messier.createSvgNode('filter', { id: 'chartNoise' });
-        chartNoise.appendChild(ns.messier.createSvgNode('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.6', numOctaves: '3', stitchTiles: 'stitch' }));
-        chartNoise.appendChild(ns.messier.createSvgNode('feColorMatrix', { type: 'matrix', values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0' }));
-        defs.appendChild(chartNoise);
         const moonGlow = ns.messier.createSvgNode('radialGradient', { id: 'moonGlow' });
         moonGlow.appendChild(ns.messier.createSvgNode('stop', { offset: '0%', 'stop-color': 'rgba(255, 255, 255, 0.22)' }));
         moonGlow.appendChild(ns.messier.createSvgNode('stop', { offset: '60%', 'stop-color': 'rgba(255, 255, 255, 0.08)' }));
@@ -182,28 +178,20 @@
         const altitudeClip = ns.messier.createSvgNode('clipPath', { id: 'altitudeClip' });
         altitudeClip.appendChild(ns.messier.createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight }));
         altitudeDefs.appendChild(altitudeClip);
-        const altitudeNoise = ns.messier.createSvgNode('filter', { id: 'altitudeNoise' });
-        altitudeNoise.appendChild(ns.messier.createSvgNode('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.6', numOctaves: '3', stitchTiles: 'stitch' }));
-        altitudeNoise.appendChild(ns.messier.createSvgNode('feColorMatrix', { type: 'matrix', values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0' }));
-        altitudeDefs.appendChild(altitudeNoise);
         elements.messierAltitudeChart.appendChild(altitudeDefs);
 
         // Draw Backgrounds
         elements.messierChart.appendChild(ns.messier.createSvgNode('rect', { x: 0, y: 0, width, height, class: 'messier-chart-backdrop' }));
         if (showPolar) {
             elements.messierChart.appendChild(ns.messier.createSvgNode('circle', { cx, cy, r: rMax, class: 'messier-chart-plot' }));
-            elements.messierChart.appendChild(ns.messier.createSvgNode('circle', { cx, cy, r: rMax, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
         } else {
             elements.messierChart.appendChild(ns.messier.createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, class: 'messier-chart-plot' }));
-            elements.messierChart.appendChild(ns.messier.createSvgNode('rect', { x: skyPlot.left, y: skyPlot.top, width: skyInnerWidth, height: skyInnerHeight, filter: 'url(#chartNoise)', style: 'pointer-events: none;' }));
         }
         elements.messierAltitudeChart.appendChild(ns.messier.createSvgNode('rect', { x: 0, y: 0, width: altitudeWidth, height: altitudeHeight, class: 'messier-chart-backdrop' }));
         elements.messierAltitudeChart.appendChild(ns.messier.createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, class: 'messier-altitude-plot' }));
         
         // Render twilight bands as the plot background
         ns.messier.renderTwilightBands(elements.messierAltitudeChart, altitudeSeries, { left: altitudePlot.left, top: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight });
-
-        elements.messierAltitudeChart.appendChild(ns.messier.createSvgNode('rect', { x: altitudePlot.left, y: altitudePlot.top, width: altitudeInnerWidth, height: altitudeInnerHeight, filter: 'url(#altitudeNoise)', style: 'pointer-events: none;' }));
 
         // Twilight Bands on Flat Map (Local Helper, no blur)
         const drawRaBand = (altitudeThreshold, className) => {

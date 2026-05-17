@@ -9,8 +9,8 @@
     const logger = ns.logger.create('messier');
 
     // --- Module State ---
-    let showEcliptic = false;
-    let showPlanets = false;
+    let showEcliptic = true;
+    let showPlanets = true;
     let showPolar = false;
     let viewRa = 0;
     let viewDec = 0;
@@ -114,7 +114,9 @@
 
     function buildSelectedDateTime() {
         const now = new Date();
-        return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+        // Keep chart background/twilight stable across rapid toggle rerenders.
+        // Using minute-level precision avoids second-level sun-position jitter.
+        return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), now.getHours(), now.getMinutes(), 0, 0);
     }
 
     function syncDateInput() {
@@ -193,6 +195,11 @@
      */
     function bindToggleEvents() {
         bindDateEvents();
+        if (elements.toggleEclipticBtn) elements.toggleEclipticBtn.classList.toggle('is-active', showEcliptic);
+        if (elements.togglePlanetsBtn) elements.togglePlanetsBtn.classList.toggle('is-active', showPlanets);
+        if (typeof ns.messier.bindRecommendationEvents === 'function') {
+            ns.messier.bindRecommendationEvents();
+        }
         if (elements.toggleEclipticBtn) elements.toggleEclipticBtn.addEventListener('click', () => { showEcliptic = !showEcliptic; elements.toggleEclipticBtn.classList.toggle('is-active', showEcliptic); renderMessierChart(); });
         if (elements.togglePlanetsBtn) elements.togglePlanetsBtn.addEventListener('click', () => { showPlanets = !showPlanets; elements.togglePlanetsBtn.classList.toggle('is-active', showPlanets); renderMessierChart(); });
         if (elements.togglePolarBtn) elements.togglePolarBtn.addEventListener('click', () => {

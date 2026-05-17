@@ -43,6 +43,7 @@
     </header>
 
     <section class="messier-chart-panel" id="messier-chart-panel" hidden>
+        <!-- 1. Sky Chart Section -->
         <div class="messier-chart-shell">
             <div class="messier-chart-header">
                 <div class="messier-chart-copy">
@@ -111,6 +112,7 @@
                 </div>
             </div>
         </div>
+        <!-- 2. Sun/Moon Plot Section -->
         <div class="messier-altitude-shell">
             <div class="messier-altitude-header">
                 <div class="messier-altitude-kicker">Sun / Moon</div>
@@ -125,10 +127,31 @@
                 <svg id="messier-altitude-chart" class="messier-chart messier-altitude-chart" viewBox="0 0 1200 280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sun and moon altitude chart"></svg>
             </div>
         </div>
+        <!-- 3. Recommend List Section -->
         <div class="messier-recommend-shell">
             <div class="messier-recommend-header">
                 <div class="messier-recommend-kicker">Observing Plan</div>
-                <div class="messier-recommend-title">Tonight's Top 10 Messier Targets</div>
+                <div class="messier-recommend-controls">
+                    <div class="messier-control-group">
+                        <div class="messier-slider-wrapper" id="wrapper-alt">
+                            <button class="messier-label-btn" id="filter-alt">Alt: <span id="val-alt">30</span>°</button>
+                            <input type="range" id="slider-alt" class="messier-slider" min="0" max="90" value="30" step="10">
+                        </div>
+                        <div class="messier-slider-wrapper" id="wrapper-mag">
+                            <button class="messier-label-btn" id="filter-mag">Mag: <span id="val-mag">10.0</span></button>
+                            <input type="range" id="slider-mag" class="messier-slider" min="0" max="15" value="10.0" step="1">
+                        </div>
+                        <div class="messier-slider-wrapper" id="wrapper-ra">
+                            <button class="messier-label-btn" id="filter-ra">RA: <span id="val-ra">3</span>h</button>
+                            <input type="range" id="slider-ra" class="messier-slider" min="0" max="12" value="3" step="1">
+                        </div>
+                    </div>
+                    <div class="messier-sort-group">
+                        <button class="messier-control-btn" id="sort-mag">Mag</button>
+                        <button class="messier-control-btn" id="sort-alt">Alt</button>
+                        <button class="messier-control-btn" id="sort-type">Type</button>
+                    </div>
+                </div>
             </div>
             <div class="messier-recommend-list" id="messier-recommend-list"></div>
         </div>

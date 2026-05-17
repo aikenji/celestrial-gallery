@@ -7,44 +7,135 @@
     const { core, astro, messierData } = ns;
     const { elements } = core;
 
+    // --- Module State ---
+    let thresholds = {
+        alt: 30,
+        mag: 10.0,
+        ra: 3 // hours
+    };
+    const sortModes = ['MAG', 'ALT', 'TYPE'];
+    let currentSortMode = 'MAG'; // Default: MAG
+
     /**
-     * Renders the top 10 recommended Messier targets for the current night.
+     * Binds click and input events for recommendation sliders and sorts.
+     */
+    function bindRecommendationEvents() {
+        const { 
+            filterAlt, sliderAlt, valAlt, 
+            filterMag, sliderMag, valMag, 
+            filterRa, sliderRa, valRa, 
+            sortMagBtn, sortAltBtn, sortTypeBtn
+        } = elements;
+
+        let needsUpdate = false;
+
+        const hideAllSliders = () => {
+            let wasVisible = false;
+            [sliderAlt, sliderMag, sliderRa].forEach(s => {
+                if (s && s.classList.contains('is-visible')) {
+                    s.classList.remove('is-visible');
+                    wasVisible = true;
+                }
+            });
+            if (wasVisible && needsUpdate) {
+                ns.messier.renderMessierChart();
+                needsUpdate = false;
+            }
+        };
+
+        const toggleSlider = (slider) => {
+            const isVisible = slider.classList.contains('is-visible');
+            // Hide others first and trigger update if needed
+            hideAllSliders();
+            if (!isVisible) {
+                slider.classList.add('is-visible');
+            }
+        };
+
+        if (filterAlt && sliderAlt) {
+            filterAlt.onclick = (e) => { e.stopPropagation(); toggleSlider(sliderAlt); };
+            sliderAlt.oninput = () => { thresholds.alt = parseInt(sliderAlt.value); if (valAlt) valAlt.textContent = thresholds.alt; needsUpdate = true; };
+        }
+        if (filterMag && sliderMag) {
+            filterMag.onclick = (e) => { e.stopPropagation(); toggleSlider(sliderMag); };
+            sliderMag.oninput = () => { thresholds.mag = parseFloat(sliderMag.value); if (valMag) valMag.textContent = thresholds.mag.toFixed(1); needsUpdate = true; };
+        }
+        if (filterRa && sliderRa) {
+            filterRa.onclick = (e) => { e.stopPropagation(); toggleSlider(sliderRa); };
+            sliderRa.oninput = () => { thresholds.ra = parseInt(sliderRa.value); if (valRa) valRa.textContent = thresholds.ra; needsUpdate = true; };
+        }
+
+        const updateSortState = (newMode) => {
+            currentSortMode = newMode;
+            [sortMagBtn, sortAltBtn, sortTypeBtn].forEach(btn => {
+                if (btn) btn.classList.remove('is-active');
+            });
+            const activeBtn = newMode === 'MAG' ? sortMagBtn : (newMode === 'ALT' ? sortAltBtn : sortTypeBtn);
+            if (activeBtn) activeBtn.classList.add('is-active');
+            ns.messier.renderMessierChart();
+        };
+
+        if (sortMagBtn) sortMagBtn.onclick = () => updateSortState('MAG');
+        if (sortAltBtn) sortAltBtn.onclick = () => updateSortState('ALT');
+        if (sortTypeBtn) sortTypeBtn.onclick = () => updateSortState('TYPE');
+
+        // Global click to hide sliders and trigger deferred update
+        window.addEventListener('click', () => {
+            hideAllSliders();
+        });
+
+        // Prevent slider clicks from bubbling up to window and closing themselves
+        [sliderAlt, sliderMag, sliderRa].forEach(s => {
+            if (s) s.onclick = (e) => e.stopPropagation();
+        });
+
+        // Initialize active state
+        updateSortState(currentSortMode);
+    }
+
+    /**
+     * Renders the recommended Messier targets for the current night.
      */
     function renderRecommendations(catalog, astroDetails, capturedIds, CFG_LOC) {
         if (!elements.messierRecommendList) return;
         elements.messierRecommendList.innerHTML = '';
 
         const midnightRa = astroDetails.midnightRa;
-        // Get a series representing the upcoming night (noon to noon)
         const altitudeSeries = astro.getObservingNightSeries(CFG_LOC, astroDetails.now, 10);
-
         const typePriority = { 'nebula': 1, 'galaxy': 2, 'cluster': 3 };
 
-        // Rank targets based on proximity to midnight RA and other criteria
-        const recommendations = catalog
-            .map(item => {
-                let raDiff = Math.abs(item.raDegrees - midnightRa);
-                if (raDiff > 180) raDiff = 360 - raDiff;
-                const isCaptured = capturedIds.has(item.id);
-                const captureScore = isCaptured ? 1 : 0;
-                const magnitude = parseFloat(item.magnitude) || 15;
-                const transitAlt = 90 - Math.abs(CFG_LOC.lat - item.decDegrees);
-                const typeScore = typePriority[item.category] || 99;
-                return { ...item, raDiff, isCaptured, captureScore, magnitude, transitAlt, typeScore };
-            })
-            .filter(item => item.transitAlt > 10) // Must be at least 10 degrees above horizon at peak
-            .sort((a, b) => {
-                // 1. Primary sort: proximity to meridian at midnight
-                if (Math.abs(a.raDiff - b.raDiff) > 15) return a.raDiff - b.raDiff;
-                // 2. Prioritize missing targets
-                if (a.captureScore !== b.captureScore) return a.captureScore - b.captureScore;
-                // 3. Type preference
+        // Map and calculate core metrics for each target
+        let recommendations = catalog.map(item => {
+            let raDiff = Math.abs(item.raDegrees - midnightRa);
+            if (raDiff > 180) raDiff = 360 - raDiff;
+            const raHours = raDiff / 15;
+            const isCaptured = capturedIds.has(item.id);
+            const magnitude = parseFloat(item.magnitude) || 15;
+            const transitAlt = 90 - Math.abs(CFG_LOC.lat - item.decDegrees);
+            const typeScore = typePriority[item.category] || 99;
+            return { ...item, raDiff, raHours, isCaptured, magnitude, transitAlt, typeScore };
+        });
+
+        // Always apply filters based on current threshold state
+        recommendations = recommendations.filter(item => {
+            return item.transitAlt >= thresholds.alt &&
+                   item.magnitude <= thresholds.mag &&
+                   item.raHours <= thresholds.ra;
+        });
+
+        // Sort Stage
+        recommendations.sort((a, b) => {
+            if (currentSortMode === 'MAG') return a.magnitude - b.magnitude;
+            if (currentSortMode === 'ALT') return b.transitAlt - a.transitAlt;
+            if (currentSortMode === 'TYPE') {
                 if (a.typeScore !== b.typeScore) return a.typeScore - b.typeScore;
-                // 4. Brightness
-                if (Math.abs(a.magnitude - b.magnitude) > 0.5) return a.magnitude - b.magnitude;
-                return b.transitAlt - a.transitAlt;
-            })
-            .slice(0, 10);
+                return a.magnitude - b.magnitude;
+            }
+            return a.raDiff - b.raDiff;
+        });
+
+        // Limit to top 10 results
+        recommendations = recommendations.slice(0, 10);
 
         recommendations.forEach(target => {
             const isCaptured = target.isCaptured;
@@ -62,17 +153,12 @@
             });
             const events = astro.getAltitudeEvents({ points: targetSeries }, 'targetAlt', 0);
 
-            const statusLabel = isCaptured 
-                ? '<span class="messier-target-status status-captured">Captured</span>' 
-                : '';
-
             row.innerHTML = `
                 <div class="messier-target-row-content">
                     <div class="messier-target-row-info">
                         <div class="messier-target-id-row ${isCaptured ? 'is-captured' : 'is-missing'}">
                             ${iconHtml}
                             ${target.id}
-                            ${statusLabel}
                         </div>
                         <div class="messier-target-meta-row">
                             ${target.category} &middot; ${target.constellation}<br>
@@ -186,4 +272,5 @@
     // Export to namespace
     ns.messier = ns.messier || {};
     ns.messier.renderRecommendations = renderRecommendations;
+    ns.messier.bindRecommendationEvents = bindRecommendationEvents;
 })();
