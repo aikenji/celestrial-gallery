@@ -130,9 +130,9 @@ const photos = [
         tags: ['PLANETS', 'URANUS']
     },
     {
-        title: 'Neptune - 2025.08.22 ed2',
+        title: 'Neptune - 2025.08.22',
         meta: 'C925 / QHY715MC',
-        url: 'library/nep-2025-08-22 ed2.jpg',
+        url: 'library/nep-2025-08-22.jpg',
         sort: 1,
         tags: ['PLANETS', 'NEPTUNE']
     },

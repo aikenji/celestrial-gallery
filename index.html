@@ -26,20 +26,22 @@
     <div class="stars-container" id="stars-container"></div>
 
     <header>
-        <div class="header-controls">
-            <button class="search-toggle" id="search-toggle" type="button" aria-label="Toggle Search">
-                <span class="search-icon"></span>
-            </button>
-            <div class="search-container" id="search-container">
-                <input type="text" id="search-input" placeholder="Global search..." aria-label="Search all photos">
-            </div>
-        </div>
         <div class="subtitle">Aiken Astrophotography</div>
         <h1 class="gallery-title" id="gallery-title">
             <span class="title-layer title-layer-current">CELESTIAL GALLERY</span>
             <span class="title-layer title-layer-next" aria-hidden="true"></span>
         </h1>
-        <nav id="nav-group"></nav>
+        <div class="nav-container">
+            <div class="header-controls">
+                <button class="search-toggle" id="search-toggle" type="button" aria-label="Toggle Search">
+                    <span class="search-icon"></span>
+                </button>
+                <div class="search-container" id="search-container">
+                    <input type="text" id="search-input" placeholder="Global search..." aria-label="Search all photos">
+                </div>
+            </div>
+            <nav id="nav-group"></nav>
+        </div>
     </header>
 
     <section class="messier-chart-panel" id="messier-chart-panel" hidden>
