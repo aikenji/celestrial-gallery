@@ -12,7 +12,7 @@
      */
     function renderChart(options) {
         const constellationData = ns.messierConstellations ? ns.messierConstellations.data : {};
-        const { showEcliptic, showPlanets, showPolar, viewRa, viewDec, showConstellations, CFG_LOC } = options;
+        const { showEcliptic, showPlanets, showPolar, viewRa, viewDec, showConstellations, showRecommendation, CFG_LOC } = options;
         const catalog = messierData.getMessierSkyData();
         const capturedIds = messierData.getCapturedMessierIds();
         const astroNow = options.astroNow;
@@ -477,17 +477,57 @@
         locLegend.appendChild(ns.messier.createSvgNode('text', { x: 10, y: 47, class: 'messier-location-text' })).textContent = `Midnight: ${Math.floor(astroDetails.midnightRa / 15)}h ${Math.floor((astroDetails.midnightRa % 15) * 4).toString().padStart(2, '0')}m`;
         elements.messierChart.appendChild(locLegend);
 
+        // Render recommendations first so marker list is in sync with current filters/sort.
+        ns.messier.renderRecommendations(catalog, astroDetails, capturedIds, CFG_LOC);
+        const recommendationIds = typeof ns.messier.getRecommendationIds === 'function' ? ns.messier.getRecommendationIds() : [];
+        const recommendationSet = new Set(recommendationIds);
+        const highlightedTargetId = typeof ns.messier.getHighlightedChartTargetId === 'function' ? ns.messier.getHighlightedChartTargetId() : null;
+
         // Render All Messier Targets
         const occupiedLabelBoxes = [];
         const capturedLabelPoints = [];
+        const recommendLabelPoints = [];
         catalog.forEach(item => {
             const captured = capturedIds.has(item.id);
             const proj = getProj(item.raDegrees, item.decDegrees);
             if (!proj.visible) return;
             const point = createMessierPointShape(item, proj.x, proj.y, captured);
+            if (highlightedTargetId === item.id) point.classList.add('is-chart-focus-ping');
+            if (showRecommendation && recommendationSet.has(item.id)) {
+                const marker = ns.messier.createSvgNode('g', {
+                    class: 'messier-recommend-marker',
+                    transform: `translate(${proj.x}, ${proj.y})`
+                });
+                const halo = ns.messier.createSvgNode('circle', { cx: 0, cy: 0, r: 7, class: 'messier-recommend-halo' });
+                marker.appendChild(halo);
+                if (highlightedTargetId === item.id) {
+                    const focusRing = ns.messier.createSvgNode('circle', { cx: 0, cy: 0, r: 12, class: 'messier-focus-ring is-chart-focus-ping' });
+                    marker.appendChild(focusRing);
+                }
+                elements.messierChart.appendChild(marker);
+                recommendLabelPoints.push({ item, pointX: proj.x, pointY: proj.y });
+            }
             if (captured) capturedLabelPoints.push({ item, pointX: proj.x, pointY: proj.y });
             point.appendChild(ns.messier.createSvgNode('title')).textContent = captured ? `${item.id} captured` : `${item.id} missing`;
             elements.messierChart.appendChild(point);
+        });
+
+        // Add labels for recommended targets (M+number), clickable to recommendation list.
+        recommendLabelPoints.sort((l, r) => l.pointX - r.pointX || l.pointY - r.pointY).forEach(({ item, pointX, pointY }) => {
+            const placement = placeMessierLabel(item, pointX, pointY, occupiedLabelBoxes);
+            const label = ns.messier.createSvgNode('text', { x: placement.x, y: placement.y, class: 'messier-point-label messier-recommend-label', 'text-anchor': placement.anchor });
+            label.textContent = item.id;
+            label.setAttribute('tabindex', '0');
+            label.setAttribute('aria-label', `${item.id} recommendation`);
+            label.addEventListener('click', () => ns.messier.jumpToRecommendRow(item.id));
+            label.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    ns.messier.jumpToRecommendRow(item.id);
+                }
+            });
+            if (highlightedTargetId === item.id) label.classList.add('is-chart-focus-ping');
+            elements.messierChart.appendChild(label);
         });
 
         // Add Labels for Captured Targets (using overlap avoidance)
@@ -503,8 +543,7 @@
             elements.messierChart.appendChild(label);
         });
 
-        // Delegate Recommendation List Rendering
-        ns.messier.renderRecommendations(catalog, astroDetails, capturedIds, CFG_LOC);
+        // Recommendation list has been rendered above.
     }
 
     /**

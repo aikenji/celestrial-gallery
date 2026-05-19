@@ -67,7 +67,8 @@
         togglePlanetsBtn: document.getElementById('toggle-planets'),
         togglePlayBtn: document.getElementById('toggle-play'),
         togglePolarBtn: document.querySelector('.messier-view-toggle'),
-        toggleConstellationsBtn: document.getElementById('toggle-constellations')
+        toggleConstellationsBtn: document.getElementById('toggle-constellations'),
+        toggleRecommendationBtn: document.getElementById('toggle-recommendation')
     };
 
     const state = {

@@ -136,11 +136,13 @@
 
         // Limit to top 10 results
         recommendations = recommendations.slice(0, 10);
+        ns.messier.setRecommendedTargets(recommendations.map(item => item.id));
 
         recommendations.forEach(target => {
             const isCaptured = target.isCaptured;
             const row = document.createElement('div');
             row.className = `messier-target-row ${isCaptured ? 'is-captured' : ''}`;
+            row.dataset.messierId = target.id;
             
             const chartId = `recommend-chart-${target.id}`;
             const iconHtml = getTargetIconHtml(target.category, isCaptured);
@@ -171,15 +173,7 @@
                 </div>
             `;
 
-            row.onclick = () => {
-                const photo = messierData.getMessierPhotoById(target.id);
-                if (photo) {
-                    ns.ui.filterPhotos('MESSIER', 'CATALOG');
-                    window.setTimeout(() => {
-                        ns.messier.focusMessierCard(target.id);
-                    }, 100);
-                }
-            };
+            row.onclick = () => ns.messier.focusMessierTargetInChart(target.id);
 
             elements.messierRecommendList.appendChild(row);
             renderDetailedMiniChart(chartId, target, astroDetails.now, altitudeSeries, events, CFG_LOC);

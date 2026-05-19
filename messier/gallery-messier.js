@@ -20,6 +20,9 @@
     let lastMouseX = 0;
     let lastMouseY = 0;
     let showConstellations = false;
+    let showRecommendation = true;
+    let recommendationIds = [];
+    let highlightedChartTargetId = null;
     let pendingMessierFocusId = null;
     let messierHoverTimer = null;
     let selectedDate = new Date();
@@ -180,9 +183,39 @@
     function renderMessierChart() {
         // Resolve function conflict by calling the specifically named renderer in ns.messier
         ns.messier.renderChart({
-            showEcliptic, showPlanets, showPolar, viewRa, viewDec, showConstellations, selectedDate, CFG_LOC,
+            showEcliptic, showPlanets, showPolar, viewRa, viewDec, showConstellations, showRecommendation, selectedDate, CFG_LOC,
             astroNow: buildSelectedDateTime()
         });
+    }
+
+    function setRecommendedTargets(ids) {
+        recommendationIds = Array.isArray(ids) ? ids.slice() : [];
+    }
+
+    function jumpToRecommendRow(messierId) {
+        if (!messierId || !elements.messierRecommendList) return;
+        const row = elements.messierRecommendList.querySelector(`[data-messier-id="${messierId}"]`);
+        if (!row) return;
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.classList.remove('is-recommend-ping');
+        void row.offsetWidth;
+        row.classList.add('is-recommend-ping');
+        window.setTimeout(() => row.classList.remove('is-recommend-ping'), 1800);
+    }
+
+    function focusMessierTargetInChart(messierId) {
+        if (!messierId) return;
+        highlightedChartTargetId = messierId;
+        renderMessierChart();
+        if (elements.messierChartFrame) {
+            elements.messierChartFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        window.setTimeout(() => {
+            if (highlightedChartTargetId === messierId) {
+                highlightedChartTargetId = null;
+                renderMessierChart();
+            }
+        }, 3000);
     }
 
     function showMessierChart(visible) {
@@ -197,6 +230,7 @@
         bindDateEvents();
         if (elements.toggleEclipticBtn) elements.toggleEclipticBtn.classList.toggle('is-active', showEcliptic);
         if (elements.togglePlanetsBtn) elements.togglePlanetsBtn.classList.toggle('is-active', showPlanets);
+        if (elements.toggleRecommendationBtn) elements.toggleRecommendationBtn.classList.toggle('is-active', showRecommendation);
         if (typeof ns.messier.bindRecommendationEvents === 'function') {
             ns.messier.bindRecommendationEvents();
         }
@@ -230,6 +264,7 @@
             window.addEventListener('mouseup', () => { isDragging = false; if (elements.messierChart) elements.messierChart.style.cursor = showPolar ? 'grab' : 'default'; });
         }
         if (elements.toggleConstellationsBtn) elements.toggleConstellationsBtn.addEventListener('click', () => { showConstellations = !showConstellations; elements.toggleConstellationsBtn.classList.toggle('is-active', showConstellations); renderMessierChart(); });
+        if (elements.toggleRecommendationBtn) elements.toggleRecommendationBtn.addEventListener('click', () => { showRecommendation = !showRecommendation; elements.toggleRecommendationBtn.classList.toggle('is-active', showRecommendation); renderMessierChart(); });
     }
 
     /**
@@ -250,6 +285,11 @@
         showMessierChart,
         showMessierPreview,
         queueHideMessierPreview,
-        bindToggleEvents
+        bindToggleEvents,
+        setRecommendedTargets,
+        jumpToRecommendRow,
+        focusMessierTargetInChart,
+        getRecommendationIds: () => recommendationIds.slice(),
+        getHighlightedChartTargetId: () => highlightedChartTargetId
     };
 })();
