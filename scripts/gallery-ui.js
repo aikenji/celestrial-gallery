@@ -4,16 +4,12 @@
     const logger = ns.logger.create('ui');
     const { categoryOrder, categoryLabels, subcategoryLabels, subcategoryOrders, elements, state, getCategoryPhotos, getHomePhotos } = core;
 
-    function createNavButton(label, onClick, isActive = false, ariaLabel = '', index = 0, extraClass = '') {
+    function createNavButton(label, onClick, isActive = false, ariaLabel = '') {
         const button = document.createElement('button');
         button.className = 'nav-item';
-        if (extraClass) {
-            button.classList.add(extraClass);
-        }
         button.type = 'button';
         button.textContent = label;
         button.setAttribute('aria-label', ariaLabel || label);
-        button.style.setProperty('--i', index);
         if (isActive) {
             button.classList.add('active');
         }
@@ -21,36 +17,84 @@
         return button;
     }
 
+    function appendSearchToNav(container) {
+        const searchWrapper = document.createElement('div');
+        searchWrapper.className = 'header-controls';
+
+        const toggle = document.createElement('button');
+        toggle.className = 'search-toggle';
+        toggle.type = 'button';
+        toggle.setAttribute('aria-label', 'Toggle Search');
+        toggle.innerHTML = '<span class="search-icon"></span>';
+        
+        const searchBox = document.createElement('div');
+        searchBox.className = 'search-container';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'search-input';
+        input.placeholder = 'Global search...';
+        input.setAttribute('aria-label', 'Search all photos');
+        
+        searchBox.appendChild(input);
+        searchWrapper.appendChild(toggle);
+        searchWrapper.appendChild(searchBox);
+        container.appendChild(searchWrapper);
+
+        elements.searchToggle = toggle;
+        elements.searchContainer = searchBox;
+        elements.searchInput = input;
+
+        toggle.addEventListener('click', () => {
+            const isActive = searchBox.classList.toggle('is-active');
+            toggle.classList.toggle('is-active');
+            
+            if (isActive) {
+                input.focus();
+            } else {
+                input.value = '';
+                state.searchQuery = '';
+                renderPhotos(state.currentCategory, state.currentSubcategory);
+            }
+        });
+
+        input.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            renderPhotos(state.currentCategory, state.currentSubcategory);
+        });
+
+        if (state.searchQuery) {
+            input.value = state.searchQuery;
+            searchBox.classList.add('is-active');
+            toggle.classList.add('is-active');
+        }
+    }
+
     function setActiveNavButton(matchText) {
         elements.navGroup.querySelectorAll('.nav-item').forEach(button => {
-            button.classList.toggle('active', button.textContent === matchText);
+            const label = button.textContent;
+            button.classList.toggle('active', label === matchText);
         });
     }
 
     function renderMainNav(activeCategory = 'ALL') {
         elements.navGroup.innerHTML = '';
-
-        if (state.isMessierMode) {
-            logger.debug('Skipped main nav render while in messier mode');
-            return;
-        }
+        if (state.isMessierMode) return;
 
         const items = [
             ['Home', 'ALL'],
             ...categoryOrder.map(category => [categoryLabels[category] || category, category])
         ];
 
-        items.forEach(([label, value], index) => {
+        items.forEach(([label, value]) => {
             elements.navGroup.appendChild(createNavButton(
                 label,
                 () => filterPhotos(value),
-                activeCategory === value,
-                label,
-                index
+                activeCategory === value
             ));
         });
 
-        logger.debug('Rendered main nav', { activeCategory, itemCount: items.length });
+        appendSearchToNav(elements.navGroup);
     }
 
     function renderSubcategoryNav(category, activeSubcategory = null) {
@@ -62,21 +106,18 @@
             return;
         }
 
-        order.forEach((subcategory, index) => {
-            if (category !== 'MESSIER' && getCategoryPhotos(category, subcategory).length === 0) {
-                return;
-            }
+        order.forEach((subcategory) => {
+            if (category !== 'MESSIER' && getCategoryPhotos(category, subcategory).length === 0) return;
 
+            const label = subcategoryLabels[subcategory] || subcategory;
             elements.navGroup.appendChild(createNavButton(
-                subcategoryLabels[subcategory] || subcategory,
+                label,
                 () => filterPhotos(category, subcategory),
-                activeSubcategory === subcategory,
-                subcategoryLabels[subcategory] || subcategory,
-                index + 1
+                activeSubcategory === subcategory
             ));
         });
 
-        logger.debug('Rendered subcategory nav', { category, activeSubcategory });
+        appendSearchToNav(elements.navGroup);
     }
 
     function renderEmptyState() {
@@ -90,9 +131,7 @@
             card.className = category === 'MESSIER' ? 'photo-card photo-card-messier' : 'photo-card';
             const isMobileMessier = category === 'MESSIER' && window.matchMedia('(max-width: 768px)').matches;
 
-            if (messierId) {
-                card.dataset.messierId = messierId;
-            }
+            if (messierId) card.dataset.messierId = messierId;
 
             card.innerHTML = `
                 <div class="photo-media ${category === 'MESSIER' ? 'photo-media-messier' : ''}">
@@ -161,20 +200,11 @@
                     .sort((left, right) => {
                         if (category === 'MESSIER') {
                             const messierDiff = messierData.getMessierSortValue(left) - messierData.getMessierSortValue(right);
-                            if (messierDiff !== 0) {
-                                return messierDiff;
-                            }
+                            if (messierDiff !== 0) return messierDiff;
                         }
                         return (left.sort || 0) - (right.sort || 0) || (left.title || '').localeCompare(right.title || '');
                     });
         }
-
-        logger.info('Rendering photos', {
-            category,
-            subcategory,
-            searchQuery: state.searchQuery,
-            count: items.length
-        });
 
         if (items.length === 0) {
             renderEmptyState();
@@ -182,60 +212,25 @@
         }
 
         renderPhotoCards(items, category);
-
-        if (category === 'MESSIER') {
-            messier.scrollToPendingMessierCard();
-        }
+        if (category === 'MESSIER') messier.scrollToPendingMessierCard();
     }
 
     function transitionSubtitle() {
-        if (state.subtitleTransitionTimer) {
-            window.clearTimeout(state.subtitleTransitionTimer);
-            state.subtitleTransitionTimer = null;
-        }
-
-        elements.subtitle.classList.add('subtitle-hidden');
-        elements.subtitle.style.animation = 'none';
-        void elements.subtitle.offsetWidth;
         elements.subtitle.classList.remove('subtitle-hidden');
-        elements.subtitle.style.animation = 'fadeInUp 1.2s 0.3s forwards';
-        state.subtitleTransitionTimer = window.setTimeout(() => {
-            state.subtitleTransitionTimer = null;
-        }, 1250);
     }
 
-    function syncNavState(visible) {
-        if (visible) {
-            elements.navGroup.classList.remove('nav-hidden');
-            elements.navGroup.classList.remove('nav-exiting');
-            elements.navGroup.style.animation = 'none';
-            void elements.navGroup.offsetWidth;
-            elements.navGroup.style.animation = 'fadeInUp 1.2s 0.6s forwards';
-            return;
-        }
-
-        elements.navGroup.classList.add('nav-exiting');
-        elements.navGroup.classList.add('nav-hidden');
-        elements.navGroup.style.animation = '';
+    function syncNavState() {
+        elements.navGroup.classList.remove('nav-hidden', 'nav-exiting');
     }
 
     function replayGalleryTitle(nextTitle) {
-        if (elements.titleCurrent.textContent === nextTitle) {
-            return;
-        }
-
-        elements.titleCurrent.style.animation = 'none';
-        elements.titleCurrent.style.opacity = '0';
-        elements.titleCurrent.style.transform = 'translateY(20px)';
         elements.titleCurrent.textContent = nextTitle;
-        void elements.titleCurrent.offsetWidth;
-        elements.titleCurrent.style.animation = 'fadeInUp 1.2s forwards';
     }
 
     function updateHeaderState(category) {
         state.isMessierMode = category === 'MESSIER';
         transitionSubtitle();
-        syncNavState(true);
+        syncNavState();
         elements.galleryLogo.classList.toggle('clickable-title', state.isMessierMode);
     }
 
@@ -243,7 +238,6 @@
         state.currentCategory = category;
         state.currentSubcategory = subcategory;
 
-        logger.info('Filtering photos', { category, subcategory });
         updateHeaderState(category);
 
         let title = 'CELESTIAL GALLERY';
@@ -261,19 +255,19 @@
         const order = subcategoryOrders[category];
         if (order && subcategory === null) {
             let firstSubcategory = order.find(name => getCategoryPhotos(category, name).length > 0) || order[0];
-
             if (category === 'MESSIER') {
                 firstSubcategory = 'CHART';
                 state.currentSubcategory = 'CHART';
                 replayGalleryTitle('MESSIER SKY CHART');
             }
-
             renderSubcategoryNav(category, firstSubcategory);
             renderPhotos(category, firstSubcategory);
             return;
         }
 
         if (order && subcategory !== null) {
+            const label = subcategoryLabels[subcategory] || subcategory;
+            setActiveNavButton(label);
             renderSubcategoryNav(category, subcategory);
             renderPhotos(category, subcategory);
             return;
@@ -284,52 +278,15 @@
             return;
         }
 
-        setActiveNavButton(category);
+        const label = categoryLabels[category] || category;
+        setActiveNavButton(label);
         renderPhotos(category);
     }
 
     function bindGlobalEvents() {
         window.filterPhotos = filterPhotos;
-
-        elements.galleryLogo.setAttribute('role', 'button');
-        elements.galleryLogo.setAttribute('tabindex', '0');
         elements.galleryLogo.addEventListener('click', () => filterPhotos('ALL'));
-        elements.galleryLogo.addEventListener('keydown', event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                filterPhotos('ALL');
-            }
-        });
-
         messier.bindToggleEvents();
-
-        if (elements.searchToggle) {
-            elements.searchToggle.addEventListener('click', () => {
-                const isActive = elements.searchContainer.classList.toggle('is-active');
-                elements.searchToggle.classList.toggle('is-active');
-                if (isActive) {
-                    elements.searchInput.focus();
-                } else {
-                    elements.searchInput.value = '';
-                    state.searchQuery = '';
-                    filterPhotos(state.currentCategory, state.currentSubcategory);
-                }
-            });
-        }
-
-        if (elements.searchInput) {
-            elements.searchInput.addEventListener('input', (e) => {
-                state.searchQuery = e.target.value;
-                if (state.searchQuery) {
-                    replayGalleryTitle('SEARCH RESULTS');
-                    renderPhotos(state.currentCategory, state.currentSubcategory);
-                } else {
-                    filterPhotos(state.currentCategory, state.currentSubcategory);
-                }
-            });
-        }
-
-        logger.debug('Bound global UI events');
     }
 
     ns.ui = {

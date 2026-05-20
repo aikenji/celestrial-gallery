@@ -37,6 +37,20 @@
         return 'Waning Crescent';
     }
 
+    function getMoonPhaseSymbol(phaseLabel) {
+        const phaseEmojis = {
+            'New Moon': '🌑',
+            'Waxing Crescent': '🌒',
+            'First Quarter': '🌓',
+            'Waxing Gibbous': '🌔',
+            'Full Moon': '🌕',
+            'Waning Gibbous': '🌖',
+            'Last Quarter': '🌗',
+            'Waning Crescent': '🌘'
+        };
+        return phaseEmojis[phaseLabel] || '🌕';
+    }
+
     function getAstroDetails(location, now = new Date()) {
         const year = now.getUTCFullYear();
         const month = now.getUTCMonth() + 1;
@@ -47,20 +61,29 @@
         const ut = hours + minutes / 60 + seconds / 3600;
         const jd = 367 * year - Math.floor(7 * (year + Math.floor((month + 9) / 12)) / 4) + Math.floor(275 * month / 9) + day + 1721013.5 + ut / 24;
         const d = jd - 2451545.0;
+
+        // LST
         const gmst = (280.46061837 + 360.98564736629 * d) % 360;
         const lst = (gmst + location.lon + 360) % 360;
+        const phi = location.lat * Math.PI / 180;
+
+        // sun
         const sunLongitudeBase = (280.46 + 0.9856474 * d) % 360;
         const solarAnomaly = (357.528 + 0.9856003 * d) % 360;
         const sunLong = sunLongitudeBase + 1.915 * Math.sin(solarAnomaly * Math.PI / 180) + 0.02 * Math.sin(2 * solarAnomaly * Math.PI / 180);
         const epsilon = 23.439 - 0.0000004 * d;
         const sunRa = (Math.atan2(Math.cos(epsilon * Math.PI / 180) * Math.sin(sunLong * Math.PI / 180), Math.cos(sunLong * Math.PI / 180)) * 180 / Math.PI + 360) % 360;
         const sunDec = Math.asin(Math.sin(epsilon * Math.PI / 180) * Math.sin(sunLong * Math.PI / 180)) * 180 / Math.PI;
+
         const midnightRa = (sunRa + 180) % 360;
-        const phi = location.lat * Math.PI / 180;
         const delta = sunDec * Math.PI / 180;
         const hourAngle = (lst - sunRa) * Math.PI / 180;
         const sinAlt = Math.sin(phi) * Math.sin(delta) + Math.cos(phi) * Math.cos(delta) * Math.cos(hourAngle);
         const sunAlt = Math.asin(sinAlt) * 180 / Math.PI;
+
+        const sunR = 1.00014 - 0.01671 * Math.cos(solarAnomaly * Math.PI / 180) - 0.00014 * Math.cos(2 * solarAnomaly * Math.PI / 180);
+        const sunX = sunR * Math.cos(sunLong * Math.PI / 180);
+        const sunY = sunR * Math.sin(sunLong * Math.PI / 180);
 
         let nightStatus = 'Day';
         if (sunAlt <= -18) {
@@ -73,6 +96,7 @@
             nightStatus = 'C.Twilight';
         }
 
+        // moon
         const moonL = (218.316 + 13.176396 * d) % 360;
         const moonM = (134.963 + 13.064993 * d) % 360;
         const moonF = (93.272 + 13.22935 * d) % 360;
@@ -83,9 +107,6 @@
         const moonPhaseAngle = (moonLong - sunLong + 360) % 360;
         const moonIllumination = (1 - Math.cos(moonPhaseAngle * Math.PI / 180)) / 2;
 
-        const sunR = 1.00014 - 0.01671 * Math.cos(solarAnomaly * Math.PI / 180) - 0.00014 * Math.cos(2 * solarAnomaly * Math.PI / 180);
-        const sunX = sunR * Math.cos(sunLong * Math.PI / 180);
-        const sunY = sunR * Math.sin(sunLong * Math.PI / 180);
 
         const planets = {};
         const planetData = {
@@ -244,19 +265,6 @@
         return { start, end, points };
     }
 
-    function getMoonPhaseSymbol(phaseLabel) {
-        const phaseEmojis = {
-            'New Moon': '🌑',
-            'Waxing Crescent': '🌒',
-            'First Quarter': '🌓',
-            'Waxing Gibbous': '🌔',
-            'Full Moon': '🌕',
-            'Waning Gibbous': '🌖',
-            'Last Quarter': '🌗',
-            'Waning Crescent': '🌘'
-        };
-        return phaseEmojis[phaseLabel] || '🌕';
-    }
 
     function formatHourLabel(localHours) {
         const normalized = ((localHours % 24) + 24) % 24;

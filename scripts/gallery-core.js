@@ -30,9 +30,9 @@
         lightbox: document.getElementById('lightbox'),
         lightboxImg: document.getElementById('lightbox-img'),
         navGroup: document.getElementById('nav-group'),
-        searchToggle: document.getElementById('search-toggle'),
-        searchContainer: document.getElementById('search-container'),
-        searchInput: document.getElementById('search-input'),
+        searchToggle: null, // Dynamically managed
+        searchContainer: null, // Dynamically managed
+        searchInput: null, // Dynamically managed
         subtitle: document.querySelector('header .subtitle'),
         galleryLogo: document.getElementById('gallery-title'),
         titleCurrent: document.querySelector('#gallery-title .title-layer-current'),

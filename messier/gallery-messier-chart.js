@@ -567,7 +567,6 @@
             for (const level of twilightLevels) {
                 if (avgSunAlt >= level.threshold) { cssClass = level.class; break; }
             }
-            // Use appendChild instead of insertBefore to respect external layering logic
             svg.appendChild(ns.messier.createSvgNode('rect', { x: x1, y: plotParams.top, width: x2 - x1, height: plotParams.height, class: cssClass }));
         });
     }
