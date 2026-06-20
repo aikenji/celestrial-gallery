@@ -11,18 +11,39 @@ const categoryLabels = {
 
 const photos = [
     {
-        title: 'Venus - 2026.05.11',
-        meta: 'C925 / QHY715MC',
-        url: 'library/ven-2026-05-11.jpg',
-        sort: 1,
-        tags: ['PLANETS', 'VENUS']
-    },
-    {
         title: 'Solar Chromosphere - 2026.05.05',
         meta: 'Lunt 60MT / QHY5III678M',
         url: 'library/solar chromosphere-2026-05-05.jpg',
         sort: 1,
         tags: ['PLANETS', 'SOLAR']
+    },
+    {
+        title: 'Solar Chromosphere - 2026.05.05 II',
+        meta: 'Lunt 60MT / QHY5III678M',
+        url: 'library/solar chromosphere-2026-05-05-2.jpg',
+        sort: 2,
+        tags: ['PLANETS', 'SOLAR']
+    },
+    {
+        title: 'Venus - 2025.08.16',
+        meta: 'C925 / QHY715MC',
+        url: 'library/ven-2025-08-16.jpg',
+        sort: 1,
+        tags: ['PLANETS', 'VENUS']
+    },
+    {
+        title: 'Venus - 2026.05.30',
+        meta: 'C925 / QHY715MC',
+        url: 'library/ven-2026-05-30.jpg',
+        sort: 2,
+        tags: ['PLANETS', 'VENUS']
+    },
+    {
+        title: 'Venus - 2026.06.06',
+        meta: 'C925 / QHY715MC',
+        url: 'library/ven-2026-06-06.jpg',
+        sort: 3,
+        tags: ['PLANETS', 'VENUS']
     },
     {
         title: 'Jupiter - 2022.11.06',
@@ -81,6 +102,20 @@ const photos = [
         tags: ['PLANETS', 'MOON']
     },
     {
+        title: 'Moon - Rimae Janssen',
+        meta: 'Lunar rille | 2026.05.21',
+        url: 'library/Moon-RimaeJanssen-2026-05-21.jpg',
+        sort: 2,
+        tags: ['PLANETS', 'MOON']
+    },
+    {
+        title: 'Moon - Rimae Petavius',
+        meta: 'Lunar rille | 2026.05.21',
+        url: 'library/Moon-RimaePetavius-2026-05-21.jpg',
+        sort: 3,
+        tags: ['PLANETS', 'MOON']
+    },
+    {
         title: 'Mars - 2025.01.12',
         meta: 'C925 / QHY715MC',
         url: 'library/mars-2025-01-12.jpg',
@@ -88,10 +123,17 @@ const photos = [
         tags: ['PLANETS', 'MARS']
     },
     {
-        title: 'Mercury - 2025.08.23',
+        title: 'Mercury - 2025.08.16',
         meta: 'C925 / QHY715MC',
-        url: 'library/mer-2025-08-23.jpg',
+        url: 'library/mer-2025-08-16-1.jpg',
         sort: 1,
+        tags: ['PLANETS', 'MERCURY']
+    },
+    {
+        title: 'Mercury - 2026.06.06',
+        meta: 'C925 / QHY715MC',
+        url: 'library/mer-2026-06-06.jpg',
+        sort: 2,
         tags: ['PLANETS', 'MERCURY']
     },
     {
@@ -244,7 +286,7 @@ const photos = [
     {
         title: 'C/2024 E3 Tsuchinshan',
         meta: 'Deep Sky | 2024-10-23',
-        url: 'library/C2024-E3-Tsuchinshan-2024-10-23.png',
+        url: 'library/C2024-E3-Tsuchinshan-2024-10-23.jpg',
         sort: 1,
         tags: ['COMETS']
     },
